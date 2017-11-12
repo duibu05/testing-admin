@@ -7,7 +7,7 @@
 <script>
 import Dropzone from 'dropzone'
 import 'dropzone/dist/dropzone.css'
-  // import { getToken } from 'api/qiniu';
+import { getToken } from 'api/qiniu'
 
 Dropzone.autoDiscover = false
 
@@ -31,9 +31,9 @@ export default {
       addRemoveLinks: this.showRemoveLink,
       acceptedFiles: this.acceptedFiles,
       autoProcessQueue: this.autoProcessQueue,
-      dictDefaultMessage: '<i style="margin-top: 3em;display: inline-block" class="material-icons">' + this.defaultMsg + '</i><br>Drop files here to upload',
+      dictDefaultMessage: '<i style="margin-top: 3em;display: inline-block" class="material-icons">' + this.defaultMsg + '</i><br>点击上传或者拖动文件到此处上传',
       dictMaxFilesExceeded: '只能一个图',
-      previewTemplate: '<div class="dz-preview dz-file-preview">  <div class="dz-image" style="width:' + this.thumbnailWidth + 'px;height:' + this.thumbnailHeight + 'px" ><img style="width:' + this.thumbnailWidth + 'px;height:' + this.thumbnailHeight + 'px" data-dz-thumbnail /></div>  <div class="dz-details"><div class="dz-size"><span data-dz-size></span></div> <div class="dz-progress"><span class="dz-upload" data-dz-uploadprogress></span></div>  <div class="dz-error-message"><span data-dz-errormessage></span></div>  <div class="dz-success-mark"> <i class="material-icons">done</i> </div>  <div class="dz-error-mark"><i class="material-icons">error</i></div></div>',
+      previewTemplate: '<div style="width: 70%;" ><img data-dz-thumbnail style="width: 100%;" /></div>',
       init() {
         const val = vm.defaultImg
         if (!val) return
@@ -59,18 +59,18 @@ export default {
       },
       accept: (file, done) => {
         /* 七牛*/
-            // const token = this.$store.getters.token;
-            // getToken(token).then(response => {
-            //   file.token = response.data.qiniu_token;
-            //   file.key = response.data.qiniu_key;
-            //   file.url = response.data.qiniu_url;
-            //   done();
-            // })
-        done()
+        const token = this.$store.getters.token
+        getToken(token).then(response => {
+          file.token = response.data.token
+          done()
+        })
+        // done()
       },
       sending: (file, xhr, formData) => {
-            // formData.append('token', file.token);
-            // formData.append('key', file.key);
+        formData.append('token', file.token)
+        // formData.append('key', file.key);
+        // 测试七牛upload
+        // formData.append('token', 'UO5pdFQPksPCtSlJfGIWf47VdYMZiv1lyaEc9Id4:gGR1sXktHXp8AOBZyWpOCteFsGs=:eyJzY29wZSI6ImppYW5saSIsImRlYWRsaW5lIjoxNTEwNTAwMzc2fQ==')
         vm.initOnce = false
       }
     })
@@ -166,15 +166,15 @@ export default {
     },
     thumbnailHeight: {
       type: Number,
-      default: 200
+      default: null
     },
     thumbnailWidth: {
       type: Number,
-      default: 200
+      default: null
     },
     showRemoveLink: {
       type: Boolean,
-      default: true
+      default: false
     },
     maxFilesize: {
       type: Number,
@@ -215,80 +215,11 @@ export default {
         background-color: #F6F6F6;
     }
 
-    i {
+    i{
         color: #CCC;
-    }
-
-    .dropzone .dz-image img {
-        width: 100%;
-        height: 100%;
     }
 
     .dropzone input[name='file'] {
         display: none;
-    }
-
-    .dropzone .dz-preview .dz-image {
-        border-radius: 0px;
-    }
-
-    .dropzone .dz-preview:hover .dz-image img {
-        transform: none;
-        -webkit-filter: none;
-        width: 100%;
-        height: 100%;
-    }
-
-    .dropzone .dz-preview .dz-details {
-        bottom: 0px;
-        top: 0px;
-        color: white;
-        background-color: rgba(33, 150, 243, 0.8);
-        transition: opacity .2s linear;
-        text-align: left;
-    }
-
-    .dropzone .dz-preview .dz-details .dz-filename span, .dropzone .dz-preview .dz-details .dz-size span {
-        background-color: transparent;
-    }
-
-    .dropzone .dz-preview .dz-details .dz-filename:not(:hover) span {
-        border: none;
-    }
-
-    .dropzone .dz-preview .dz-details .dz-filename:hover span {
-        background-color: transparent;
-        border: none;
-    }
-
-    .dropzone .dz-preview .dz-remove {
-        position: absolute;
-        z-index: 30;
-        color: white;
-        margin-left: 15px;
-        padding: 10px;
-        top: inherit;
-        bottom: 15px;
-        border: 2px white solid;
-        text-decoration: none;
-        text-transform: uppercase;
-        font-size: 0.8rem;
-        font-weight: 800;
-        letter-spacing: 1.1px;
-        opacity: 0;
-    }
-
-    .dropzone .dz-preview:hover .dz-remove {
-        opacity: 1;
-    }
-
-    .dropzone .dz-preview .dz-success-mark, .dropzone .dz-preview .dz-error-mark {
-        margin-left: -40px;
-        margin-top: -50px;
-    }
-
-    .dropzone .dz-preview .dz-success-mark i, .dropzone .dz-preview .dz-error-mark i {
-        color: white;
-        font-size: 5rem;
     }
 </style>
