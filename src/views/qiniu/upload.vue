@@ -25,7 +25,7 @@ export default{
       return new Promise((resolve, reject) => {
         getToken().then(response => {
           const key = response.data.qiniu_key
-          const token = response.data.qiniu_token
+          const token = response.data.token
           _self._data.dataObj.token = token
           _self._data.dataObj.key = key
           resolve(true)

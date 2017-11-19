@@ -113,7 +113,7 @@ export default {
 <style rel="stylesheet/scss" lang="scss" scoped>
   // Fonts:
   $font-size-base: 16px;
-  $font-size-small: 18px;
+  $font-size-small: 14px;
   $font-size-smallest: 12px;
   $font-weight-normal: normal;
   $font-weight-bold: bold;
@@ -150,7 +150,7 @@ export default {
 
   // Component:
   .material-input__component {
-    margin-top: 36px;
+    margin-top: 16px;
     position: relative;
     * {
       box-sizing: border-box;

@@ -1,12 +1,12 @@
 <template>
-    <div class="upload-container">
+    <div class="upload-container" v-loading="loading" element-loading-text="文件上传中...">
         <el-upload class="image-uploader" :data="dataObj" drag :multiple="false" :show-file-list="false" :action="QINIU_UPLOAD_DOMAIN" :before-upload="beforeUpload" :on-success="handleImageScucess">
             <i class="el-icon-upload"></i>
             <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
         </el-upload>
-        <div class="image-preview">
+        <div class="image-preview" v-show="imageUrl">
             <div class="image-preview-wrapper" v-show="imageUrl">
-                <img :src="imageUrl+'?imageView2/1/w/200/h/200'">
+                <img @load="loading = false" :src="imageUrl+'?imageView2/1/w/200/h/200'">
                 <div class="image-preview-action">
                     <i @click="rmImage" class="el-icon-delete"></i>
                 </div>
@@ -16,44 +16,42 @@
 </template>
 
 <script>
-// 预览效果见付费文章
 import { getToken } from '@/api/qiniu'
 
 export default {
   name: 'singleImageUpload',
-  props: {
-    value: String,
-    type: String
-  },
+  props: ['value'],
   data() {
     return {
-      imageUrl: '',
+      loading: false,
       QINIU_UPLOAD_DOMAIN: process.env.QINIU_UPLOAD_DOMAIN,
-      dataObj: { token: '', key: '' }
+      dataObj: { token: '' }
+    }
+  },
+  computed: {
+    imageUrl() {
+      return this.value
     }
   },
   methods: {
     rmImage() {
-      this.imageUrl = ''
       this.emitInput('')
     },
     emitInput(val) {
-      this.$emit('input', {
-        url: val,
-        type: this.type
-      })
+      this.$emit('input', val)
     },
     handleImageScucess(file) {
-      this.imageUrl = process.env.QINIU_DOWNLOAD_DOMAIN + file.hash
-      this.emitInput(this.imageUrl)
+      this.emitInput(process.env.QINIU_DOWNLOAD_DOMAIN + file.hash)
     },
     beforeUpload() {
+      this.loading = true
       const _self = this
       return new Promise((resolve, reject) => {
         getToken().then(response => {
           _self._data.dataObj.token = response.data.token
           resolve(true)
         }).catch(err => {
+          this.loading = false
           console.log(err)
           reject(false)
         })
@@ -66,20 +64,18 @@ export default {
 <style rel="stylesheet/scss" lang="scss" scoped>
     @import "src/styles/mixin.scss";
     .upload-container {
-        width: 100%;
+        width: 200px;
         position: relative;
         @include clearfix;
         .image-uploader {
-            width: 60%;
+            width: 100%;
             float: left;
         }
         .image-preview {
             width: 200px;
             height: 200px;
-            position: relative;
-            border: 1px dashed #d9d9d9;
+            position: absolute;
             float: left;
-            margin-left: 50px;
             .image-preview-wrapper {
                 position: relative;
                 width: 100%;
@@ -87,6 +83,7 @@ export default {
                 img {
                     width: 100%;
                     height: 100%;
+                    border-radius: 6px;
                 }
             }
             .image-preview-action {
@@ -101,6 +98,7 @@ export default {
                 opacity: 0;
                 font-size: 20px;
                 background-color: rgba(0, 0, 0, .5);
+                border-radius: 6px;
                 transition: opacity .3s;
                 cursor: pointer;
                 text-align: center;

@@ -1,7 +1,6 @@
 <template>
 	<div class="singleImageUpload2 upload-container">
-		<el-upload class="image-uploader" :data="dataObj" drag :multiple="false" :show-file-list="false" :action="QINIU_UPLOAD_DOMAIN"
-		  :on-success="handleImageScucess">
+		<el-upload class="image-uploader" :data="dataObj" drag :multiple="false" :show-file-list="false"  :action="QINIU_UPLOAD_DOMAIN" :before-upload="beforeUpload" :on-success="handleImageScucess">
 			<i class="el-icon-upload"></i>
 			<div class="el-upload__text">Drag或<em>点击上传</em></div>
 		</el-upload>
@@ -51,7 +50,7 @@ export default {
       return new Promise((resolve, reject) => {
         getToken().then(response => {
           const key = response.data.qiniu_key
-          const token = response.data.qiniu_token
+          const token = response.data.token
           _self._data.dataObj.token = token
           _self._data.dataObj.key = key
           this.tempUrl = response.data.qiniu_url

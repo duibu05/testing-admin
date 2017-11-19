@@ -7,6 +7,7 @@
                     class="editor-slide-upload"
                     :action="QINIU_UPLOAD_DOMAIN"
                     :multiple="true"
+                    :data="dataObj"
                     :file-list="fileList"
                     :show-file-list="true"
                     list-type="picture-card"
@@ -21,7 +22,7 @@
     </div>
 </template>
 <script>
-// import { getToken } from 'api/qiniu'
+import { getToken } from '@/api/qiniu'
 
 export default {
   name: 'editorSlideUpload',
@@ -36,7 +37,8 @@ export default {
       QINIU_UPLOAD_DOMAIN: process.env.QINIU_UPLOAD_DOMAIN,
       dialogVisible: false,
       listObj: {},
-      fileList: []
+      fileList: [],
+      dataObj: { token: '' }
     }
   },
   methods: {
@@ -46,10 +48,9 @@ export default {
     handleSubmit() {
       const arr = Object.keys(this.listObj).map(v => this.listObj[v])
       if (!this.checkAllSuccess()) {
-        this.$message('请等待所有图片上传成功 或 出现了网络问题，请刷新页面重新上传！')
+        this.$message('请等待所有图片上传成功后再提交！')
         return
       }
-      console.log(arr)
       this.$emit('successCBK', arr)
       this.listObj = {}
       this.fileList = []
@@ -60,7 +61,7 @@ export default {
       const objKeyArr = Object.keys(this.listObj)
       for (let i = 0, len = objKeyArr.length; i < len; i++) {
         if (this.listObj[objKeyArr[i]].uid === uid) {
-          this.listObj[objKeyArr[i]].url = response.files.file
+          this.listObj[objKeyArr[i]].url = process.env.QINIU_DOWNLOAD_DOMAIN + file.response.hash
           this.listObj[objKeyArr[i]].hasSuccess = true
           return
         }
@@ -87,7 +88,14 @@ export default {
         img.onload = function() {
           _self.listObj[fileName] = { hasSuccess: false, uid: file.uid, width: this.width, height: this.height }
         }
-        resolve(true)
+        getToken().then(response => {
+          _self._data.dataObj.token = response.data.token
+          resolve(true)
+        }).catch(err => {
+          this.loading = false
+          console.log(err)
+          reject(false)
+        })
       })
     }
   }
