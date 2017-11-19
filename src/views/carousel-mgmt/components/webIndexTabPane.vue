@@ -26,7 +26,7 @@
 
       <el-table-column align="center" label="操作" width="100">
         <template scope="scope">
-          <el-button type="primary" @click.native="handleEdit(scope.row.id, listQuery.type)">编辑</el-button>
+          <el-button type="text" icon="document" @click.native="handleEdit(scope.row.id, listQuery.type)">编辑</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -36,6 +36,7 @@
 
 <script>
 import { fetchList, update } from '@/api/carousel-mgmt'
+
 import Sortable from 'sortablejs'
 
 export default {

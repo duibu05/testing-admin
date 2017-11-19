@@ -61,9 +61,77 @@ export const asyncRouterMap = [
         meta: { role: ['admin'] }
       },
       {
+        path: 'wechat-index',
+        component: _import('carousel-mgmt/wechat-index'),
+        name: '微信首页',
+        meta: { role: ['admin'] }
+      },
+      {
         path: 'teacher-qe',
         component: _import('carousel-mgmt/teacher-qe'),
         name: '教师资格',
+        meta: { role: ['admin'] }
+      },
+      {
+        path: 'juducial-exam',
+        component: _import('carousel-mgmt/juducial-exam'),
+        name: '司法考试',
+        meta: { role: ['admin'] }
+      }
+    ]
+  },
+  {
+    path: '/website-mgmt',
+    component: Layout,
+    redirect: '/website-mgmt/news-center',
+    name: '网站管理',
+    icon: 'component',
+    meta: { role: ['admin'] },
+    children: [
+      {
+        path: 'news-center',
+        component: _import('website-mgmt/news-center'),
+        name: '新闻中心',
+        meta: { role: ['admin'] }
+      },
+      {
+        path: 'lesson-mgmt',
+        component: _import('website-mgmt/lesson-mgmt'),
+        name: '课程管理',
+        meta: { role: ['admin'] }
+      },
+      {
+        path: 'website-content',
+        component: _import('website-mgmt/website-content'),
+        name: '网站内容',
+        meta: { role: ['admin'] }
+      }
+    ]
+  },
+  {
+    path: '/wechat-mgmt',
+    component: Layout,
+    redirect: '/wechat-mgmt/paper-mgmt',
+    name: '微信管理',
+    icon: 'component',
+    meta: { role: ['admin'] },
+    children: [
+      {
+        path: 'paper-mgmt',
+        component: _import('wechat-mgmt/paper-mgmt'),
+        name: '试卷管理',
+        meta: { role: ['admin'] }
+      },
+      {
+        path: 'question-mgmt',
+        component: _import('wechat-mgmt/question-mgmt'),
+        name: '试题管理',
+        meta: { role: ['admin'] }
+      },
+      {
+        path: 'wechat-content',
+        component: _import('wechat-mgmt/wechat-content'),
+        name: '微信内容',
         meta: { role: ['admin'] }
       }
     ]
