@@ -21,7 +21,7 @@
       :visible.sync="showUploadDialog"
       :before-close="cancelUploading">
       <div class="editor-container">
-        <dropzone v-on:dropzone-removedFile="dropzoneR" :maxFiles="1" v-on:dropzone-success="dropzoneS" id="myVueDropzone" url="http://up-na0.qiniu.com/"></dropzone>
+        <dropzone v-on:dropzone-removedFile="dropzoneR" :maxFiles="1" v-on:dropzone-success="dropzoneS" v-loading="uploadLoading" element-loading-text="正在上传..." @uploadBegin="showUploadLoading" id="myVueDropzone" url="http://up-na0.qiniu.com/"></dropzone>
       </div>
       <span slot="footer" class="dialog-footer">
         <el-button @click="cancelUploading">取 消</el-button>
@@ -106,10 +106,14 @@
         },
         ptypeOptions: [{ label: '网站内容', key: '' }, { label: '精品课程', key: 'lesson' }, { label: '新闻中心', key: 'news' }, { label: '教师资格', key: 'teacher_qe' }, { label: '司法考试', key: 'judcial_exam' }],
         tableKey: 0,
-        selectWhichOne: {}
+        selectWhichOne: {},
+        uploadLoading: false
       }
     },
     methods: {
+      showUploadLoading() {
+        this.uploadLoading = true
+      },
       updatingImg() {
         this.bodyLoading = true
         this.showUploadDialog = false
@@ -128,6 +132,7 @@
         }, 1500)
       },
       dropzoneS(file) {
+        this.uploadLoading = false
         this.newImgURL = JSON.parse(file.xhr.response).hash
         this.$message({ message: '上传成功', type: 'success' })
       },

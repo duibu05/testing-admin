@@ -67,6 +67,7 @@ export default {
         // done()
       },
       sending: (file, xhr, formData) => {
+        vm.$emit('uploadBegin')
         formData.append('token', file.token)
         // formData.append('key', file.key);
         // 测试七牛upload
