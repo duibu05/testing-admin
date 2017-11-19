@@ -21,7 +21,7 @@
       :visible.sync="showUploadDialog"
       :before-close="cancelUploading">
       <div class="editor-container">
-        <dropzone v-on:dropzone-removedFile="dropzoneR" :maxFiles="1" v-on:dropzone-success="dropzoneS" v-loading="uploadLoading" element-loading-text="正在上传..." @uploadBegin="showUploadLoading" id="myVueDropzone" url="http://up-na0.qiniu.com/"></dropzone>
+        <dropzone v-on:dropzone-removedFile="dropzoneR" :maxFiles="1" v-on:dropzone-success="dropzoneS" v-loading="uploadLoading" element-loading-text="正在上传..." @uploadBegin="showUploadLoading" id="myVueDropzone" :url="QINIU_UPLOAD_DOMAIN"></dropzone>
       </div>
       <span slot="footer" class="dialog-footer">
         <el-button @click="cancelUploading">取 消</el-button>
@@ -75,7 +75,6 @@
   import waves from '@/directive/waves/index.js' // 水波纹指令
 
   import { fetchList } from '@/api/joiner'
-  import qiniuCfg from '@/api/qiniu'
 
   export default {
     name: 'tabEdit',
@@ -85,6 +84,7 @@
     },
     data() {
       return {
+        QINIU_UPLOAD_DOMAIN: process.env.QINIU_UPLOAD_DOMAIN,
         newImgURL: '',
         targetId: 0,
         showUploadDialog: false,
@@ -124,7 +124,7 @@
         setTimeout(() => {
           _this.list.map(v => {
             if (v.id === _this.targetId) {
-              v.post = qiniuCfg.domain + _this.newImgURL
+              v.post = process.env.QINIU_DOWNLOAD_DOMAIN + _this.newImgURL
               _this.bodyLoading = false
               _this.targetId = 0
               _this.newImgURL = ''

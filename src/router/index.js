@@ -44,7 +44,14 @@ export const asyncRouterMap = [
     icon: 'people',
     meta: { role: ['admin'] },
     noDropdown: true,
-    children: [{ path: 'list', component: _import('join-list/index'), name: '报名管理', meta: { role: ['admin'] }}]
+    children: [
+      {
+        path: 'list',
+        component: _import('join-list/index'),
+        name: '报名管理',
+        meta: { role: ['admin'] }
+      }
+    ]
   },
   {
     path: '/carousel-mgmt',
@@ -132,6 +139,28 @@ export const asyncRouterMap = [
         path: 'wechat-content',
         component: _import('wechat-mgmt/wechat-content'),
         name: '微信内容',
+        meta: { role: ['admin'] }
+      }
+    ]
+  },
+  {
+    path: '/material-mgmt',
+    component: Layout,
+    redirect: '/material-mgmt/about-us',
+    name: '素材管理',
+    icon: 'component',
+    meta: { role: ['admin'] },
+    children: [
+      {
+        path: 'about-us',
+        component: _import('material-mgmt/about-us'),
+        name: '关于我们',
+        meta: { role: ['admin'] }
+      },
+      {
+        path: 'right-sidebar',
+        component: _import('material-mgmt/right-sidebar'),
+        name: '侧边栏',
         meta: { role: ['admin'] }
       }
     ]

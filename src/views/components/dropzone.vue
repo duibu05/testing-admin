@@ -5,7 +5,7 @@
       由于我司业务有特殊需求，而且要传七牛 所以没用第三方 选择了自己封装
     </code>
     <div class="editor-container">
-      <dropzone v-on:dropzone-removedFile="dropzoneR" v-on:dropzone-success="dropzoneS" id="myVueDropzone" url="https://httpbin.org/post"></dropzone>
+      <dropzone v-on:dropzone-removedFile="dropzoneR" v-on:dropzone-success="dropzoneS" id="myVueDropzone" :url="QINIU_UPLOAD_DOMAIN"></dropzone>
     </div>
   </div>
 </template>
@@ -14,6 +14,11 @@
 import Dropzone from '@/components/Dropzone'
 
 export default {
+  data() {
+    return {
+      QINIU_UPLOAD_DOMAIN: process.env.QINIU_UPLOAD_DOMAIN
+    }
+  },
   components: { Dropzone },
   methods: {
     dropzoneS(file) {

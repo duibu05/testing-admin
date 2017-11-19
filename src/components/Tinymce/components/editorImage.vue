@@ -5,7 +5,7 @@
         <el-dialog v-model="dialogVisible">
             <el-upload
                     class="editor-slide-upload"
-                    action="https://httpbin.org/post"
+                    :action="QINIU_UPLOAD_DOMAIN"
                     :multiple="true"
                     :file-list="fileList"
                     :show-file-list="true"
@@ -33,6 +33,7 @@ export default {
   },
   data() {
     return {
+      QINIU_UPLOAD_DOMAIN: process.env.QINIU_UPLOAD_DOMAIN,
       dialogVisible: false,
       listObj: {},
       fileList: []
