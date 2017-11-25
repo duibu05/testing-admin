@@ -14,39 +14,49 @@
 
       <div class="createPost-main-container">
         <el-row>
-
           <el-col :span="18">
-            <el-form-item style="margin-bottom: 2px;" prop="hotline">
-              <MDinput name="name" v-model="postForm.hotline" required :maxlength="100">
-                咨询热线
-              </MDinput>
-            </el-form-item>
+            <el-row>
+
+              <el-col :span="8">
+                <el-form-item class="input" prop="hotline">
+                  <MDinput name="name" v-model="postForm.hotline" required :maxlength="100">
+                    咨询热线
+                  </MDinput>
+                </el-form-item>
+              </el-col>
+
+              <el-col :span="8">
+                <el-form-item class="input" prop="complaintPhone">
+                  <MDinput name="name" v-model="postForm.complaintPhone" required :maxlength="100">
+                    投诉电话
+                  </MDinput>
+                </el-form-item>
+              </el-col>
+
+              <el-col :span="8">
+                <el-form-item class="input" prop="email">
+                  <MDinput name="name" v-model="postForm.email" required :maxlength="100">
+                    E-mail
+                  </MDinput>
+                </el-form-item>
+              </el-col>
+
+              <el-col :span="24">
+                <el-form-item class="input" prop="address">
+                  <MDinput name="name" v-model="postForm.address" required :maxlength="100">
+                    地址
+                  </MDinput>
+                </el-form-item>
+              </el-col>
+            </el-row>
           </el-col>
-
-          <el-col :span="18">
-            <el-form-item style="margin-bottom: 2px;" prop="complaintPhone">
-              <MDinput name="name" v-model="postForm.complaintPhone" required :maxlength="100">
-                投诉电话
-              </MDinput>
-            </el-form-item>
-          </el-col>
-
-          <el-col :span="18">
-            <el-form-item style="margin-bottom: 2px;" prop="email">
-              <MDinput name="name" v-model="postForm.email" required :maxlength="100">
-                E-mail
-              </MDinput>
-            </el-form-item>
-          </el-col>
-
-          <el-col :span="18">
-            <el-form-item style="margin-bottom: 20px;" prop="address">
-              <MDinput name="name" v-model="postForm.address" required :maxlength="100">
-                地址
-              </MDinput>
+          <el-col :span="6">
+            <el-form-item class="input" prop="addressMap">
+              <Upload class="upload" v-model="postForm.addressMap" ></Upload>
             </el-form-item>
           </el-col>
         </el-row>
+        
 
         <div class="editor-container">
           <tinymce :height=400 ref="editor" v-model="postForm.content"></tinymce>
@@ -63,31 +73,15 @@ import Tinymce from '@/components/Tinymce'
 import Upload from '@/components/Upload/singleImage4'
 import MDinput from '@/components/MDinput'
 import Sticky from '@/components/Sticky' // 粘性header组件
-import { validateURL } from '@/utils/validate'
 
 export default {
   name: 'articleDetail',
   components: { Tinymce, MDinput, Upload, Sticky },
   data() {
-    const validateSourceUri = (rule, value, callback) => {
-      if (value) {
-        if (validateURL(value)) {
-          callback()
-        } else {
-          this.$message({
-            message: '位置照片路径非法，请重新上传！',
-            type: 'error'
-          })
-          callback(null)
-        }
-      } else {
-        callback()
-      }
-    }
     return {
       postForm: {
         hotline: '',
-        content: '公司介绍',
+        content: '请输入公司介绍......',
         complaintPhone: '',
         email: '',
         address: '',
@@ -100,7 +94,7 @@ export default {
         complaintPhone: [{ required: true, message: '投诉电话不能为空！' }],
         email: [{ required: true, message: 'E-mail不能为空！' }],
         address: [{ required: true, message: '地址不能为空！' }],
-        addressMap: [{ validator: validateSourceUri, trigger: 'blur' }]
+        addressMap: [{ required: true, message: '位置照片不能为空！' }]
       }
     }
   },
@@ -148,6 +142,21 @@ export default {
     position: relative;
     .createPost-main-container {
       padding: 40px 45px 20px 50px;
+
+      .input {
+        margin-bottom: 20px; 
+        margin-top: 20px;
+        margin-right: 15px;
+          .upload{
+            width: 200px;
+            height: 200px;
+            box-sizing: border-box;
+            overflow: hidden;
+            /deep/.el-upload-dragger{
+              border-radius: 100%;
+            }
+          }
+      }
       .editor-container {
         min-height: 500px;
         margin: 0 0 30px;

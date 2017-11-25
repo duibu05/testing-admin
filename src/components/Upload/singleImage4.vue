@@ -64,22 +64,22 @@ export default {
 <style rel="stylesheet/scss" lang="scss" scoped>
     @import "src/styles/mixin.scss";
     .upload-container {
-        width: 200px;
+        box-sizing: border-box;
+        width: 100%;
         position: relative;
         @include clearfix;
         .image-uploader {
             width: 100%;
+            box-sizing: border-box;
             float: left;
         }
         .image-preview {
-            width: 200px;
-            height: 200px;
+            box-sizing: border-box;
             position: absolute;
             float: left;
             .image-preview-wrapper {
                 position: relative;
-                width: 100%;
-                height: 100%;
+                box-sizing: border-box;
                 img {
                     width: 100%;
                     height: 100%;
@@ -88,8 +88,8 @@ export default {
             }
             .image-preview-action {
                 position: absolute;
+                box-sizing: border-box;
                 width: 100%;
-                height: 100%;
                 left: 0;
                 top: 0;
                 cursor: default;

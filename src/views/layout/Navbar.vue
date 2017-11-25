@@ -8,21 +8,22 @@
 		<el-dropdown class="avatar-container" trigger="click">
 			<div class="avatar-wrapper">
 				<img class="user-avatar" :src="avatar+'?imageView2/1/w/80/h/80'">
-				<i class="el-icon-caret-bottom"></i>
+				<span>卢纪霖</span>
+				<span class="el-icon-caret-bottom"></span>
 			</div>
 			<el-dropdown-menu class="user-dropdown" slot="dropdown">
-				<!-- <router-link class='inlineBlock' to="/">
+				<router-link class='inlineBlock' to="/profile">
 					<el-dropdown-item>
-						控制台
+						个人中心
 					</el-dropdown-item>
 				</router-link>
-				<a target='_blank' href="https://github.com/PanJiaChen/vue-element-admin/">
+				<router-link class='inlineBlock' to="/profile/password">
 					<el-dropdown-item>
-						项目地址
+						修改密码
 					</el-dropdown-item>
-				</a> -->
+				</router-link>
 				<!-- <el-dropdown-item divided><span @click="logout" style="display:block;">退出登录</span></el-dropdown-item> -->
-				<el-dropdown-item><span @click="logout" style="display:block;">退出登录</span></el-dropdown-item> 
+				<el-dropdown-item><span @click="logout" style="display:block;">退出登录</span></el-dropdown-item>
 			</el-dropdown-menu>
 		</el-dropdown>
 	</el-menu>
@@ -96,20 +97,20 @@ export default {
 					height: 50px;
 					display: inline-block;
 					position: absolute;
-					right: 35px;
+					right: 20px;
 					.avatar-wrapper {
+							display: flex;
+							align-items: center;
 							cursor: pointer;
-							margin-top: 5px;
 							position: relative;
 							.user-avatar {
-									width: 40px;
-									height: 40px;
+									width: 35px;
+									height: 35px;
 									border-radius: 10px;
+									margin-right: 5px;
 							}
 							.el-icon-caret-bottom {
-									position: absolute;
-									right: -20px;
-									top: 25px;
+									margin-left: 5px;
 									font-size: 12px;
 							}
 					}

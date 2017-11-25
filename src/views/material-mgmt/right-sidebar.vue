@@ -34,13 +34,13 @@
 
             <el-col :span="10" >
                 <el-form-item label-width="100px" label="微信:" class="postInfo-container-item" prop="wechatQRCodeURL">
-                  <Upload v-model="postForm.wechatQRCodeURL" ></Upload>
+                  <Upload class="upload" v-model="postForm.wechatQRCodeURL" ></Upload>
                 </el-form-item>
             </el-col>
 
             <el-col :span="10">
                 <el-form-item label-width="100px" label="地址:" class="postInfo-container-item" prop="addressMapURL">
-                  <Upload v-model="postForm.addressMapURL"></Upload>
+                  <Upload class="upload" v-model="postForm.addressMapURL"></Upload>
                 </el-form-item>
             </el-col>
 
@@ -93,11 +93,11 @@
           qq: [{ required: true, trigger: 'blur', message: '企业QQ不能为空！' }],
           phone: [{ required: true, trigger: 'blur', message: '联系电话不能为空！' }],
           wechatQRCodeURL: [
-            { validator: validateSourceUri, message: '333' },
+            { validator: validateSourceUri },
             { required: true, message: '微信为必填项！' }
           ],
           addressMapURL: [
-            { validator: validateSourceUri, message: '444' },
+            { validator: validateSourceUri },
             { required: true, message: '地址为必填项！' }
           ]
         }
@@ -154,6 +154,10 @@
         margin-bottom: 10px;
         .postInfo-container-item {
           float: left;
+          .upload{
+            width: 200px;
+            height: 200px;
+          }
         }
       }
     }

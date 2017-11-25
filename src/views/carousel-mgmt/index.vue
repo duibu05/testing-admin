@@ -169,11 +169,12 @@
         this.showDialog = false
         this.selectWhichOne = {}
       },
-      clearDialog() {
+      clearDialog(done) {
         if (this.selectWhichOne && this.selectWhichOne.id) {
           this.$confirm('确认关闭？')
             .then(_ => {
               this.closeDialog()
+              done()
             })
             .catch(_ => {})
           return
