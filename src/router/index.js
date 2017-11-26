@@ -17,8 +17,6 @@ import Layout from '../views/layout/Layout'
 **/
 export const constantRouterMap = [
   { path: '/login', component: _import('login/index'), hidden: true },
-  { path: '/profile', component: _import('profile/index'), hidden: true },
-  { path: '/profile/password', component: _import('profile/password'), hidden: true },
   { path: '/authredirect', component: _import('login/authredirect'), hidden: true },
   { path: '/404', component: _import('errorPage/404'), hidden: true },
   { path: '/401', component: _import('errorPage/401'), hidden: true },
@@ -235,6 +233,28 @@ export const asyncRouterMap = [
         path: 'roles',
         component: _import('auth/roles'),
         name: '角色管理',
+        meta: { role: ['admin'] }
+      }
+    ]
+  },
+  {
+    path: '/profile',
+    component: Layout,
+    redirect: '/profile/index',
+    name: '账号设置',
+    icon: 'eye',
+    meta: { role: ['admin'] },
+    children: [
+      {
+        path: 'index',
+        component: _import('profile/index'),
+        name: '个人中心',
+        meta: { role: ['admin'] }
+      },
+      {
+        path: 'password',
+        component: _import('profile/password'),
+        name: '修改密码',
         meta: { role: ['admin'] }
       }
     ]

@@ -35,6 +35,14 @@
         prop="meta.joinAt"
         label="注册时间">
       </el-table-column>
+      <el-table-column align="center" label="操作">
+        <template scope="scope">
+          <el-button type="text" class="el-icon-circle-close"> 关闭</el-button>
+          <el-button type="text" icon="document">编辑</el-button>
+          <el-button type="text" icon="delete">删除</el-button>
+          <el-button type="text" icon="setting" @click="dialogVisible = true">重置密码</el-button>
+        </template>
+      </el-table-column>
     </el-table>
 
     <div v-show="!listLoading" class="pagination-container">
@@ -42,13 +50,30 @@
         :page-sizes="[10,20,30, 50]" :page-size="listQuery.limit" layout="total, sizes, prev, pager, next, jumper" :total="total">
       </el-pagination>
     </div>
+
+    <el-dialog
+        title="重置密码"
+        :visible.sync="dialogVisible"
+        size="tiny">
+        <el-form :model="form" :rules="rules" ref="form" label-width="100px">
+          <el-form-item label="密码" prop="pass">
+            <el-input type="password" v-model="form.pass" auto-complete="off"></el-input>
+          </el-form-item>
+          <el-form-item label="确认密码" prop="checkPass">
+            <el-input type="password" v-model="form.checkPass" auto-complete="off"></el-input>
+          </el-form-item>
+        </el-form>
+        <span slot="footer" class="dialog-footer">
+          <el-button @click="dialogVisible = false">取 消</el-button>
+          <el-button type="primary" @click="submitForm('form')">提交</el-button>
+        </span>
+      </el-dialog>
   </div>
 </template>
 
 <script>
 import { fetchList } from '@/api/joiner'
 import waves from '@/directive/waves/index.js' // 水波纹指令
-import { parseTime } from '@/utils'
 
 export default {
   name: 'joiner-table',
@@ -56,24 +81,70 @@ export default {
     waves
   },
   data() {
+    const validatePass = (rule, value, callback) => {
+      if (value === '') {
+        callback(new Error('请输入密码'))
+      } else {
+        if (this.form.checkPass !== '') {
+          this.$refs.form.validateField('checkPass')
+        }
+        callback()
+      }
+    }
+    const validatePass2 = (rule, value, callback) => {
+      if (value === '') {
+        callback(new Error('请再次输入密码'))
+      } else if (value !== this.form.pass) {
+        callback(new Error('两次输入密码不一致!'))
+      } else {
+        callback()
+      }
+    }
+
     return {
+      dialogVisible: false,
       list: null,
       total: null,
       listLoading: true,
       listQuery: {
         page: 1,
-        limit: 20,
-        stdName: undefined,
-        stdPhone: undefined
+        limit: 20
       },
-      ptypeOptions: [{ label: '全部', key: '' }, { label: '考试报名', key: 'test' }, { label: '课程报名', key: 'lesson' }],
-      tableKey: 0
+      tableKey: 0,
+      form: {
+        pass: '',
+        checkPass: '',
+        oldpass: ''
+      },
+      rules: {
+        pass: [
+          { required: true, message: '新密码为必填项！' },
+          { validator: validatePass, trigger: 'blur' }
+        ],
+        checkPass: [
+          { required: true, message: '确认密码为必填项！' },
+          { validator: validatePass2, trigger: 'blur' }
+        ],
+        oldpass: [
+          { required: true, message: '旧密码为必填项！' }
+        ]
+      }
     }
   },
   created() {
     this.getList()
   },
   methods: {
+    submitForm(formName) {
+      this.$refs[formName].validate((valid) => {
+        if (valid) {
+          alert('submit!')
+        } else {
+          console.log('error submit!!')
+          return false
+        }
+      })
+    },
     getList() {
       this.listLoading = true
       fetchList(this.listQuery).then(response => {
@@ -93,16 +164,15 @@ export default {
     handleCurrentChange(val) {
       this.listQuery.page = val
       this.getList()
-    },
-    formatJson(filterVal, jsonData) {
-      return jsonData.map(v => filterVal.map(j => {
-        if (j === 'timestamp') {
-          return parseTime(v[j])
-        } else {
-          return v[j]
-        }
-      }))
     }
   }
 }
 </script>
+
+<style ref="stylesheet/scss" lang="scss" scoped>
+  .app-container{
+    el-input{
+      width: 300px;
+    }
+  }
+</style>

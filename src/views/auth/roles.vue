@@ -1,15 +1,5 @@
 <template>
   <div class="app-container calendar-list-container">
-    <div class="filter-container">
-      <el-input @keyup.enter.native="handleFilter" style="width: 200px;" class="filter-item" placeholder="请输入用户昵称" v-model="listQuery.stdName">
-      </el-input>
-
-      <el-input @keyup.enter.native="handleFilter" style="width: 200px;" class="filter-item" placeholder="手机号码" v-model="listQuery.stdPhone">
-      </el-input>
-
-      <el-button class="filter-item" type="primary" v-waves icon="search" @click="handleFilter">搜索</el-button>
-    </div>
-
     <el-table :key='tableKey' :data="list" v-loading="listLoading" element-loading-text="拼命加载中..." border fit stripe highlight-current-row style="width: 100%" max-height="600">
       <el-table-column
         width="65"
@@ -35,6 +25,12 @@
         prop="meta.joinAt"
         label="注册时间">
       </el-table-column>
+      <el-table-column align="center" label="操作" width="300">
+        <template scope="scope">
+          <el-button type="text" icon="document">编辑</el-button>
+          <el-button type="text" icon="delete">删除</el-button>
+        </template>
+      </el-table-column>
     </el-table>
 
     <div v-show="!listLoading" class="pagination-container">
@@ -48,7 +44,6 @@
 <script>
 import { fetchList } from '@/api/joiner'
 import waves from '@/directive/waves/index.js' // 水波纹指令
-import { parseTime } from '@/utils'
 
 export default {
   name: 'joiner-table',
@@ -62,11 +57,8 @@ export default {
       listLoading: true,
       listQuery: {
         page: 1,
-        limit: 20,
-        stdName: undefined,
-        stdPhone: undefined
+        limit: 20
       },
-      ptypeOptions: [{ label: '全部', key: '' }, { label: '考试报名', key: 'test' }, { label: '课程报名', key: 'lesson' }],
       tableKey: 0
     }
   },
@@ -93,15 +85,6 @@ export default {
     handleCurrentChange(val) {
       this.listQuery.page = val
       this.getList()
-    },
-    formatJson(filterVal, jsonData) {
-      return jsonData.map(v => filterVal.map(j => {
-        if (j === 'timestamp') {
-          return parseTime(v[j])
-        } else {
-          return v[j]
-        }
-      }))
     }
   }
 }
