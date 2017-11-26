@@ -1,6 +1,6 @@
 <template>
   <section v-loading="showLoading" element-loading-text="请给我点时间..." class="container">
-    <el-button class="filter-item" style="margin-bottom: 20px;" type="primary" icon="edit" @click="dialogVisible = true">添加</el-button>
+    <el-button class="filter-item" style="margin-bottom: 20px;" type="primary" icon="plus" @click="dialogVisible = true">添加</el-button>
     <el-tabs v-if="category" type="border-card" class="tab" v-model="activeName" @tab-click="handleClick">
       <el-tab-pane v-for="(value, key) in category" :key="key" :label="value.label" :name="key">
         <el-row>

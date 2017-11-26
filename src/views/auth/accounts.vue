@@ -37,8 +37,8 @@
       </el-table-column>
       <el-table-column align="center" label="操作">
         <template scope="scope">
-          <el-button type="text" class="el-icon-circle-close"> 关闭</el-button>
-          <el-button type="text" icon="document">编辑</el-button>
+          <el-button type="text" class="circle-close"> 关闭</el-button>
+          <el-button type="text" icon="edit">编辑</el-button>
           <el-button type="text" icon="delete">删除</el-button>
           <el-button type="text" icon="setting" @click="dialogVisible = true">重置密码</el-button>
         </template>

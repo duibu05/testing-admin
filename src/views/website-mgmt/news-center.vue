@@ -10,7 +10,7 @@
       </el-select>
 
       <el-button class="filter-item" type="primary" v-waves icon="search" @click="handleFilter">搜索</el-button>
-      <el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="edit">添加</el-button>
+      <el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="plus" @click="goToAddNews('add')">添加</el-button>
     </div>
 
     <el-table :key='tableKey' :data="list" v-loading="listLoading" element-loading-text="拼命加载中..." border fit stripe highlight-current-row style="width: 100%" max-height="600">
@@ -36,7 +36,7 @@
       </el-table-column>
       <el-table-column align="center" label="操作" width="200">
         <template scope="scope">
-          <el-button type="text" icon="document">编辑</el-button>
+          <el-button type="text" icon="edit" @click="goToAddNews('edit')">编辑</el-button>
           <el-button type="text" icon="delete">删除</el-button>
         </template>
       </el-table-column>
@@ -82,6 +82,9 @@ export default {
     this.getList()
   },
   methods: {
+    goToAddNews(action) {
+      this.$router.push({ path: '/website-mgmt/news-center/' + action })
+    },
     getList() {
       this.listLoading = true
       fetchList(this.listQuery).then(response => {

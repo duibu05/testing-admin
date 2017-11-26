@@ -27,7 +27,7 @@
       </el-table-column>
       <el-table-column align="center" label="操作" width="300">
         <template scope="scope">
-          <el-button type="text" icon="document">编辑</el-button>
+          <el-button type="text" icon="edit">编辑</el-button>
           <el-button type="text" icon="delete">删除</el-button>
         </template>
       </el-table-column>

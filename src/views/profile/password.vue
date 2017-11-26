@@ -2,13 +2,13 @@
   <section class="container">
     <el-form :model="form" :rules="rules" ref="form" label-width="100px" class="demo-ruleForm">
       <el-form-item label="旧密码" prop="oldpass">
-        <el-input type="password" v-model="form.oldpass" auto-complete="off"></el-input>
+        <el-input placeholder="请输入旧密码" type="password" v-model="form.oldpass" auto-complete="off"></el-input>
       </el-form-item>
       <el-form-item label="新密码" prop="pass">
-        <el-input type="password" v-model="form.pass" auto-complete="off"></el-input>
+        <el-input placeholder="请输入新密码" type="password" v-model="form.pass" auto-complete="off"></el-input>
       </el-form-item>
       <el-form-item label="确认密码" prop="checkPass">
-        <el-input type="password" v-model="form.checkPass" auto-complete="off"></el-input>
+        <el-input placeholder="请确认密码" type="password" v-model="form.checkPass" auto-complete="off"></el-input>
       </el-form-item>
       <el-form-item>
         <el-button type="primary" @click="submitForm('form')">提交</el-button>

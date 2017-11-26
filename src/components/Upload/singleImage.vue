@@ -16,7 +16,6 @@
 </template>
 
 <script>
-// 预览效果见付费文章
 import { getToken } from '@/api/qiniu'
 
 export default {

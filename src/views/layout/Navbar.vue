@@ -2,13 +2,10 @@
 	<el-menu class="navbar" mode="horizontal">
 		<hamburger class="hamburger-container" :toggleClick="toggleSideBar" :isActive="sidebar.opened"></hamburger>
 		<levelbar></levelbar>
-		<!-- <tabs-view></tabs-view> -->
-		<!-- <error-log v-if="log.length>0" class="errLog-container" :logsList="log"></error-log>
-		<screenfull class='screenfull'></screenfull> -->
 		<el-dropdown class="avatar-container" trigger="click">
 			<div class="avatar-wrapper">
 				<img class="user-avatar" :src="avatar+'?imageView2/1/w/80/h/80'">
-				<span>卢纪霖</span>
+				<span>小明</span>
 				<span class="el-icon-caret-bottom"></span>
 			</div>
 			<el-dropdown-menu class="user-dropdown" slot="dropdown">
@@ -23,7 +20,7 @@
 					</el-dropdown-item>
 				</router-link>
 				<!-- <el-dropdown-item divided><span @click="logout" style="display:block;">退出登录</span></el-dropdown-item> -->
-				<el-dropdown-item><span @click="logout" style="display:block;">退出登录</span></el-dropdown-item>
+				<el-dropdown-item divided><span @click="logout" style="display:block;">退出登录</span></el-dropdown-item>
 			</el-dropdown-menu>
 		</el-dropdown>
 	</el-menu>
@@ -81,17 +78,6 @@ export default {
 					height: 50px;
 					float: left;
 					padding: 0 10px;
-			}
-			.errLog-container {
-					display: inline-block;
-					position: absolute;
-					right: 150px;
-			}
-			.screenfull {
-					position: absolute;
-					right: 90px;
-					top: 16px;
-					color: red;
 			}
 			.avatar-container {
 					height: 50px;
