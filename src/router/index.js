@@ -109,7 +109,7 @@ export const asyncRouterMap = [
         meta: { role: ['admin'], isEdit: false }
       },
       {
-        path: 'news-center/edit',
+        path: 'news-center/edit/:id',
         component: _import('website-mgmt/add-news'),
         name: '新闻中心 / 编辑新闻',
         hidden: true,

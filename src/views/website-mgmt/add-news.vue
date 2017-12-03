@@ -16,7 +16,7 @@
         </section>
       </el-form-item>
       <el-form-item label="附件" prop="attachments">
-        <Upload v-model="form.attachments"></Upload>
+        <Upload v-model="form.attachments" :files="form.attachments || {}"></Upload>
       </el-form-item>
       <el-form-item label="新闻详情" prop="content">
         <tinymce :height=200 ref="editor" v-model="form.content"></tinymce>
@@ -32,6 +32,7 @@
 <script>
   import Tinymce from '@/components/Tinymce'
   import Upload from '@/components/Upload/fileUpload'
+  import { save, get, update } from '@/api/news'
 
   export default {
     components: {
@@ -75,12 +76,28 @@
       },
       fetchData() {
         // 通过接口获取数据
+        get(this.$route.params.id).then(res => {
+          this.form.title = res.data.data.title
+          this.form.keywords = res.data.data.keywords
+          this.form.attachments = res.data.data.attachments
+          this.form.content = res.data.data.content
+        })
       },
       submitForm(formName) {
         this.$refs[formName].validate((valid) => {
           if (valid) {
-            alert('submit!')
-            console.log(this.form)
+            let opt
+            if (this.isEdit) {
+              opt = update(this.$route.params.id, this.form)
+            } else {
+              opt = save(this.form)
+            }
+            opt.then(res => {
+              if (res.data.code === 0 || res.status === 204) {
+                this.$message.success('提交成功！')
+                history.back()
+              }
+            })
           } else {
             console.log('error submit!!')
             return false

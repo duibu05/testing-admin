@@ -19,24 +19,28 @@
         align="center"
         label="编号">
         <template scope="scope">
-            <span>{{scope.row.id}}</span>
+            <span>{{scope.row.index}}</span>
         </template>
       </el-table-column>
       <el-table-column
-        prop="stdName"
+        prop="title"
         label="新闻标题">
       </el-table-column>
       <el-table-column
-        prop="ptype"
         label="新闻分类">
+        <template scope="scope">
+          <span>新闻中心</span>
+        </template>
       </el-table-column>
       <el-table-column
-        prop="meta.joinAt"
         label="发布时间">
+        <template scope="scope">
+          <span>{{new Date(scope.row.createdAt) | formatTime}}</span>
+        </template>
       </el-table-column>
       <el-table-column align="center" label="操作" width="200">
         <template scope="scope">
-          <el-button type="text" icon="edit" @click="goToAddNews('edit')">编辑</el-button>
+          <el-button type="text" icon="edit" @click="goToAddNews('edit', scope.row._id)">编辑</el-button>
           <el-button type="text" icon="delete">删除</el-button>
         </template>
       </el-table-column>
@@ -51,12 +55,12 @@
 </template>
 
 <script>
-import { fetchList } from '@/api/joiner'
+import { fetchList } from '@/api/news'
 import waves from '@/directive/waves/index.js' // 水波纹指令
 import { parseTime } from '@/utils'
 
 export default {
-  name: 'joiner-table',
+  name: 'news-table',
   directives: {
     waves
   },
@@ -82,8 +86,8 @@ export default {
     this.getList()
   },
   methods: {
-    goToAddNews(action) {
-      this.$router.push({ path: '/website-mgmt/news-center/' + action })
+    goToAddNews(action, _id = '') {
+      this.$router.push({ path: `/website-mgmt/news-center/${action}/${_id}` })
     },
     getList() {
       this.listLoading = true

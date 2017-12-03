@@ -2,7 +2,7 @@
   <el-upload
     class="upload-file"
     :data="dataObj" 
-    :multiple="true" 
+    :multiple="false" 
     :action="QINIU_UPLOAD_DOMAIN"
     :before-upload="beforeUpload"
     :on-success="handleImageScucess"
@@ -17,6 +17,9 @@
   import { getToken } from '@/api/qiniu'
 
   export default {
+    props: [
+      'files'
+    ],
     data() {
       return {
         fileList: [],
@@ -26,16 +29,24 @@
         obj: {}
       }
     },
+    watch: {
+      files() {
+        this.fileList = Object.values(this.files)
+        this.obj = this.files
+      }
+    },
     methods: {
-      handleRemove(file) {
-        delete this.obj[file.response.hash]
+      handleRemove(file, fileList) {
+        console.log(file, fileList)
+        delete this.obj[file.url]
         this.emitInput(this.obj)
       },
       emitInput(val) {
         this.$emit('input', val)
       },
       handleImageScucess(file, fileList) {
-        this.obj[fileList.response.hash] = fileList.name
+        console.log(file, fileList)
+        this.obj[fileList.response.hash] = { name: fileList.name, url: fileList.response.hash }
         this.loading = false
         this.emitInput(this.obj)
       },
