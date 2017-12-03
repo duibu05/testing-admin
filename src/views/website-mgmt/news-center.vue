@@ -1,7 +1,7 @@
 <template>
   <div class="app-container calendar-list-container">
     <div class="filter-container">
-      <el-input @keyup.enter.native="handleFilter" style="width: 200px;" class="filter-item" placeholder="新闻标题" v-model="listQuery.stdName">
+      <el-input @keyup.enter.native="handleFilter" style="width: 200px;" class="filter-item" placeholder="新闻标题" v-model="listQuery.keyword">
       </el-input>
 
       <el-select @change='handleFilter' style="width: 160px" class="filter-item" v-model="listQuery.sort" placeholder="排序">
@@ -17,10 +17,7 @@
       <el-table-column
         width="65"
         align="center"
-        label="编号">
-        <template scope="scope">
-            <span>{{scope.row.index}}</span>
-        </template>
+        type="index">
       </el-table-column>
       <el-table-column
         prop="title"
@@ -41,7 +38,7 @@
       <el-table-column align="center" label="操作" width="200">
         <template scope="scope">
           <el-button type="text" icon="edit" @click="goToAddNews('edit', scope.row._id)">编辑</el-button>
-          <el-button type="text" icon="delete">删除</el-button>
+          <el-button type="text" icon="delete" @click="delNews(scope.row._id)">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -55,7 +52,7 @@
 </template>
 
 <script>
-import { fetchList } from '@/api/news'
+import { fetchList, del } from '@/api/news'
 import waves from '@/directive/waves/index.js' // 水波纹指令
 import { parseTime } from '@/utils'
 
@@ -66,17 +63,15 @@ export default {
   },
   data() {
     return {
-      sortOptions: [{ label: '按发布时间升序', key: '+id' }, { label: '按发布时间降序', key: '-id' }],
+      sortOptions: [{ label: '最新发布', key: '-createdAt' }, { label: '最早发布', key: '+createdAt' }],
       list: null,
       total: null,
       listLoading: true,
       listQuery: {
         page: 1,
         limit: 20,
-        stdName: undefined,
-        stdPhone: undefined,
-        sort: undefined,
-        type: undefined
+        keyword: undefined,
+        sort: undefined
       },
       ptypeOptions: [{ label: '全部', key: '' }, { label: '考试报名', key: 'test' }, { label: '课程报名', key: 'lesson' }],
       tableKey: 0
@@ -86,6 +81,22 @@ export default {
     this.getList()
   },
   methods: {
+    delNews(id) {
+      this.$confirm('此操作将永久删除该新闻, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        del(id).then(res => {
+          if (res.status === 204) {
+            this.$message.success('删除成功！')
+          } else {
+            this.$message.error('删除失败！')
+          }
+        })
+        .catch(() => this.$message.error('删除失败！!'))
+      }).catch(() => {})
+    },
     goToAddNews(action, _id = '') {
       this.$router.push({ path: `/website-mgmt/news-center/${action}/${_id}` })
     },

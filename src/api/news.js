@@ -31,3 +31,10 @@ export function update(id, data) {
   })
 }
 
+export function del(id) {
+  return fetch({
+    url: `/news/${id}`,
+    method: 'delete'
+  })
+}
+
