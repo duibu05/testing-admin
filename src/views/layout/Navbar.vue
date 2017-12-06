@@ -4,8 +4,8 @@
 		<levelbar></levelbar>
 		<el-dropdown class="avatar-container" trigger="click">
 			<div class="avatar-wrapper">
-				<img class="user-avatar" :src="avatar+'?imageView2/1/w/80/h/80'">
-				<span>小明</span>
+				<!-- <img class="user-avatar" :src="avatar+'?imageView2/1/w/80/h/80'"> -->
+				<span>{{avatar}}</span>
 				<span class="el-icon-caret-bottom"></span>
 			</div>
 			<el-dropdown-menu class="user-dropdown" slot="dropdown">
@@ -85,8 +85,6 @@ export default {
 					position: absolute;
 					right: 20px;
 					.avatar-wrapper {
-							display: flex;
-							align-items: center;
 							cursor: pointer;
 							position: relative;
 							.user-avatar {
