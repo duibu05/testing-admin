@@ -134,7 +134,7 @@
       this.showLoading = true
       fetchList('shiti').then(response => {
         this.showLoading = false
-        this.category = response.data.data || {}
+        this.category = response.data || {}
       })
     }
   }

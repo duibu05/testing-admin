@@ -209,7 +209,7 @@
         this.listLoading = true
         this.selectWhichOne = {}
         fetchList(this.listQuery).then(response => {
-          this.dialogList = response.data.data.list
+          this.dialogList = response.data.list
           this.listLoading = false
         })
       }

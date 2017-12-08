@@ -77,10 +77,10 @@
       fetchData() {
         // 通过接口获取数据
         get(this.$route.params.id).then(res => {
-          this.form.title = res.data.data.title
-          this.form.keywords = res.data.data.keywords
-          this.form.attachments = res.data.data.attachments
-          this.form.content = res.data.data.content
+          this.form.title = res.data.title
+          this.form.keywords = res.data.keywords
+          this.form.attachments = res.data.attachments
+          this.form.content = res.data.content
         })
       },
       submitForm(formName) {
@@ -93,9 +93,11 @@
               opt = save(this.form)
             }
             opt.then(res => {
-              if (res.data.code === 0 || res.status === 204) {
+              if (res.code === 0) {
                 this.$message.success('提交成功！')
                 history.back()
+              } else {
+                this.$message.error('提交失败！')
               }
             })
           } else {

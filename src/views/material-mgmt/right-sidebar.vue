@@ -110,7 +110,7 @@
     methods: {
       fetchData() {
         fetchSidebar().then(response => {
-          const data = response.data.data
+          const data = response.data
           this.postForm.phone = data.phone
           this.postForm.qq = data.qq
           this.postForm.wechatQRCodeURL = data.wechatQRCodeURL

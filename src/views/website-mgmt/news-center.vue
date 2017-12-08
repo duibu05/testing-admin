@@ -17,7 +17,10 @@
       <el-table-column
         width="65"
         align="center"
-        type="index">
+        label="编号">
+        <template scope="scope">
+            <span>{{(scope.$index+1)*listQuery.page}}</span>
+        </template>
       </el-table-column>
       <el-table-column
         prop="title"
@@ -88,7 +91,7 @@ export default {
         type: 'warning'
       }).then(() => {
         del(id).then(res => {
-          if (res.status === 204) {
+          if (res.code === 0) {
             this.$message.success('删除成功！')
           } else {
             this.$message.error('删除失败！')
@@ -103,8 +106,8 @@ export default {
     getList() {
       this.listLoading = true
       fetchList(this.listQuery).then(response => {
-        this.list = response.data.data.list
-        this.total = response.data.data.total || 0
+        this.list = response.data.list
+        this.total = response.data.total || 0
         this.listLoading = false
       })
     },

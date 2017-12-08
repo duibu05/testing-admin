@@ -75,7 +75,7 @@ export default {
       this.loading = true
 
       fetchList(this.listQuery).then(response => {
-        this.list = response.data.data[this.listQuery.type]
+        this.list = response.data[this.listQuery.type]
         this.$emit('dataList', this.list)
         this.loading = false
         this.$nextTick(() => {

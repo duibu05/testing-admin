@@ -134,7 +134,7 @@
       this.showLoading = true
       fetchList('wechat').then(response => {
         this.showLoading = false
-        this.category = response.data.data || {}
+        this.category = response.data || {}
       })
     }
   }

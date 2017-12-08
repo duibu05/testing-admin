@@ -16,24 +16,28 @@
         align="center"
         label="编号">
         <template scope="scope">
-            <span>{{scope.row.id}}</span>
+            <span>{{(scope.$index+1)*listQuery.page}}</span>
         </template>
       </el-table-column>
       <el-table-column
-        prop="stdName"
-        label="头像">
-      </el-table-column>
-      <el-table-column
-        prop="pname"
+        prop="nickname"
         label="昵称">
       </el-table-column>
       <el-table-column
-        prop="stdPhone"
-        label="手机号码">
+        prop="role"
+        label="角色">
       </el-table-column>
       <el-table-column
-        prop="meta.joinAt"
-        label="注册时间">
+        prop="account"
+        label="登录账号">
+      </el-table-column>
+      <el-table-column
+        prop="phone"
+        label="联系方式">
+      </el-table-column>
+      <el-table-column
+        prop="status"
+        label="账号状态">
       </el-table-column>
       <el-table-column align="center" label="操作">
         <template scope="scope">
@@ -72,11 +76,11 @@
 </template>
 
 <script>
-import { fetchList } from '@/api/joiner'
+import { fetchList } from '@/api/user'
 import waves from '@/directive/waves/index.js' // 水波纹指令
 
 export default {
-  name: 'joiner-table',
+  name: 'users-table',
   directives: {
     waves
   },
@@ -148,8 +152,8 @@ export default {
     getList() {
       this.listLoading = true
       fetchList(this.listQuery).then(response => {
-        this.list = response.data.data.list
-        this.total = response.data.data.total || 0
+        this.list = response.data.list
+        this.total = response.data.total || 0
         this.listLoading = false
       })
     },
