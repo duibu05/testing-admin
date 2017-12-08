@@ -10,13 +10,13 @@
       <el-button class="filter-item" type="primary" v-waves icon="search" @click="handleFilter">搜索</el-button>
     </div>
 
-    <el-table :key='tableKey' :data="list" v-loading="listLoading" element-loading-text="拼命加载中..." border fit stripe highlight-current-row style="width: 100%" max-height="600">
+    <el-table :key='tableKey' :data="list" v-loading="listLoading" :element-loading-text="loadingText" border fit stripe highlight-current-row style="width: 100%" max-height="600">
       <el-table-column
         width="65"
         align="center"
         label="编号">
         <template scope="scope">
-            <span>{{(scope.$index+1)*listQuery.page}}</span>
+          <span>{{scope.$index+1+(listQuery.page-1)*listQuery.limit}}</span>
         </template>
       </el-table-column>
       <el-table-column
@@ -39,12 +39,12 @@
         prop="status"
         label="账号状态">
       </el-table-column>
-      <el-table-column align="center" label="操作">
+      <el-table-column width="300" align="center" label="操作">
         <template scope="scope">
           <el-button type="text" class="circle-close"> 关闭</el-button>
           <el-button type="text" icon="edit">编辑</el-button>
           <el-button type="text" icon="delete">删除</el-button>
-          <el-button type="text" icon="setting" @click="dialogVisible = true">重置密码</el-button>
+          <el-button type="text" icon="setting" @click="showResetPwdDialog(scope.row._id)">重置密码</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -60,7 +60,7 @@
         :visible.sync="dialogVisible"
         size="tiny">
         <el-form :model="form" :rules="rules" ref="form" label-width="100px">
-          <el-form-item label="密码" prop="pass">
+          <el-form-item label="新密码" prop="pass">
             <el-input type="password" v-model="form.pass" auto-complete="off"></el-input>
           </el-form-item>
           <el-form-item label="确认密码" prop="checkPass">
@@ -76,7 +76,8 @@
 </template>
 
 <script>
-import { fetchList } from '@/api/user'
+import { mapGetters } from 'vuex'
+import { fetchList, resetPassword } from '@/api/user'
 import waves from '@/directive/waves/index.js' // 水波纹指令
 
 export default {
@@ -106,6 +107,8 @@ export default {
     }
 
     return {
+      loadingText: '拼命加载中...',
+      currentUserId: '',
       dialogVisible: false,
       list: null,
       total: null,
@@ -138,11 +141,36 @@ export default {
   created() {
     this.getList()
   },
+  computed: {
+    ...mapGetters([
+      'id'
+    ])
+  },
   methods: {
+    showResetPwdDialog(id) {
+      this.dialogVisible = true
+      this.currentUserId = id
+    },
     submitForm(formName) {
       this.$refs[formName].validate((valid) => {
         if (valid) {
-          alert('submit!')
+          this.dialogVisible = false
+          this.listLoading = true
+          this.loadingText = '拼命提交中...'
+          resetPassword(this.currentUserId, { password: this.form.pass, token: '' })
+            .then(res => {
+              this.$message.success('修改成功！')
+              this.listLoading = false
+              this.$refs[formName].resetFields()
+
+              // 如果修改的是自己的密码，则强制登出
+              if (this.id === this.currentUserId) {
+                this.$message.warning('您修改了自己的密码，请重新登录！')
+                this.$store.dispatch('LogOut').then(() => {
+                  location.reload()// 为了重新实例化vue-router对象 避免bug
+                })
+              }
+            })
         } else {
           console.log('error submit!!')
           return false
@@ -151,6 +179,7 @@ export default {
     },
     getList() {
       this.listLoading = true
+      this.loadingText = '拼命加载中...'
       fetchList(this.listQuery).then(response => {
         this.list = response.data.list
         this.total = response.data.total || 0

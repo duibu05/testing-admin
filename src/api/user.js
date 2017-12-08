@@ -23,6 +23,14 @@ export function save(query) {
   })
 }
 
+export function resetPassword(id, data) {
+  return fetch({
+    url: `/users/reset-password/${id}`,
+    method: 'put',
+    data: data
+  })
+}
+
 export function update(id, data) {
   return fetch({
     url: `/users/${id}`,

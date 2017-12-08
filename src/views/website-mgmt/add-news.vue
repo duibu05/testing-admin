@@ -1,5 +1,5 @@
 <template>
-  <section class="container">
+  <section class="container" v-loading="showLoading" element-loading-text="loadingText">
     <el-form :model="form" :rules="rules" ref="form" label-width="100px">
       <el-form-item label="新闻标题" prop="title">
         <el-input placeholder="请输入新闻标题" v-model="form.title"></el-input>
@@ -41,6 +41,8 @@
     },
     data() {
       return {
+        showLoading: false,
+        loadingText: '拼命加载中...',
         form: {
           title: '',
           keywords: [{
@@ -75,17 +77,21 @@
         })
       },
       fetchData() {
+        this.showLoading = true
         // 通过接口获取数据
         get(this.$route.params.id).then(res => {
           this.form.title = res.data.title
           this.form.keywords = res.data.keywords
           this.form.attachments = res.data.attachments
           this.form.content = res.data.content
+          this.showLoading = false
         })
       },
       submitForm(formName) {
         this.$refs[formName].validate((valid) => {
           if (valid) {
+            this.showLoading = true
+            this.loadingText = '拼命提交中...'
             let opt
             if (this.isEdit) {
               opt = update(this.$route.params.id, this.form)
@@ -95,8 +101,10 @@
             opt.then(res => {
               if (res.code === 0) {
                 this.$message.success('提交成功！')
+                this.showLoading = false
                 history.back()
               } else {
+                this.showLoading = false
                 this.$message.error('提交失败！')
               }
             })

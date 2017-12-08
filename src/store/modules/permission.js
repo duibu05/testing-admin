@@ -19,6 +19,7 @@ import { asyncRouterMap, constantRouterMap } from '@/router'
  * @param routes
  */
 function filterAsyncRouter(asyncRouterMap, routes) {
+  routes.push('profile')
   const accessedRouters = asyncRouterMap.filter(route => {
     if (routes.indexOf(route.path.substr(1)) !== -1) {
       return true

@@ -5,7 +5,7 @@
 		<el-dropdown class="avatar-container" trigger="click">
 			<div class="avatar-wrapper">
 				<!-- <img class="user-avatar" :src="avatar+'?imageView2/1/w/80/h/80'"> -->
-				<span>{{avatar}}</span>
+				<span>{{nickname}}</span>
 				<span class="el-icon-caret-bottom"></span>
 			</div>
 			<el-dropdown-menu class="user-dropdown" slot="dropdown">
@@ -51,8 +51,7 @@ export default {
   computed: {
     ...mapGetters([
       'sidebar',
-      'name',
-      'avatar'
+      'nickname'
     ])
   },
   methods: {

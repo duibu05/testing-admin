@@ -3,40 +3,25 @@ import { getToken, setToken, removeToken } from '@/utils/auth'
 
 const user = {
   state: {
-    user: '',
     status: '',
-    code: '',
     token: getToken(),
-    name: '',
-    avatar: '',
-    introduction: '',
-    roles: [],
-    setting: {
-      articlePlatform: []
-    }
+    nickname: '',
+    id: '',
+    roles: []
   },
 
   mutations: {
-    SET_CODE: (state, code) => {
-      state.code = code
-    },
     SET_TOKEN: (state, token) => {
       state.token = token
-    },
-    SET_INTRODUCTION: (state, introduction) => {
-      state.introduction = introduction
-    },
-    SET_SETTING: (state, setting) => {
-      state.setting = setting
     },
     SET_STATUS: (state, status) => {
       state.status = status
     },
-    SET_NAME: (state, name) => {
-      state.name = name
+    SET_nickname: (state, nickname) => {
+      state.nickname = nickname
     },
-    SET_AVATAR: (state, avatar) => {
-      state.avatar = avatar
+    SET_ID: (state, id) => {
+      state.id = id
     },
     SET_ROLES: (state, roles) => {
       state.roles = roles
@@ -65,9 +50,8 @@ const user = {
         getUserInfo(state.token).then(response => {
           const data = response.data
           commit('SET_ROLES', data.role)
-          // commit('SET_NAME', data.nickname + '123')
-          commit('SET_AVATAR', data.nickname)
-          // commit('SET_INTRODUCTION', data.introduction)
+          commit('SET_ID', data._id)
+          commit('SET_nickname', data.nickname)
           resolve(response)
         }).catch(error => {
           reject(error)
@@ -121,8 +105,6 @@ const user = {
           const data = response.data
           commit('SET_ROLES', data.role)
           commit('SET_NAME', data.name)
-          commit('SET_AVATAR', data.avatar)
-          commit('SET_INTRODUCTION', data.introduction)
           resolve()
         })
       })

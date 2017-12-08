@@ -19,7 +19,7 @@
         align="center"
         label="编号">
         <template scope="scope">
-            <span>{{(scope.$index+1)*listQuery.page}}</span>
+          <span>{{scope.$index+1+(listQuery.page-1)*listQuery.limit}}</span>
         </template>
       </el-table-column>
       <el-table-column

@@ -26,28 +26,6 @@ export const constantRouterMap = [
     redirect: '/profile/password',
     name: '首页',
     hidden: true
-  },
-  {
-    path: '/profile',
-    component: Layout,
-    redirect: '/profile/index',
-    name: '账号设置',
-    icon: 'eye',
-    meta: { role: ['admin'] },
-    children: [
-      {
-        path: 'index',
-        component: _import('profile/index'),
-        name: '个人中心',
-        meta: { role: ['admin'] }
-      },
-      {
-        path: 'password',
-        component: _import('profile/password'),
-        name: '修改密码',
-        meta: { role: ['admin'] }
-      }
-    ]
   }
 ]
 
@@ -311,6 +289,28 @@ export const asyncRouterMap = [
         path: 'roles',
         component: _import('auth/roles'),
         name: '角色管理',
+        meta: { role: ['admin'] }
+      }
+    ]
+  },
+  {
+    path: '/profile',
+    component: Layout,
+    redirect: '/profile/index',
+    name: '账号设置',
+    icon: 'eye',
+    meta: { role: ['admin'] },
+    children: [
+      {
+        path: 'index',
+        component: _import('profile/index'),
+        name: '个人中心',
+        meta: { role: ['admin'] }
+      },
+      {
+        path: 'password',
+        component: _import('profile/password'),
+        name: '修改密码',
         meta: { role: ['admin'] }
       }
     ]
