@@ -86,8 +86,6 @@ export default {
 
           return obj
         })
-
-        console.log(this.catOptions)
       })
     this.getList()
   },

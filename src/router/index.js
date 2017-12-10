@@ -178,6 +178,20 @@ export const asyncRouterMap = [
         meta: { role: ['admin'] }
       },
       {
+        path: 'question-mgmt/add',
+        component: _import('wechat-mgmt/add-question'),
+        name: '试题管理 / 添加试题',
+        hidden: true,
+        meta: { role: ['admin'], isEdit: false }
+      },
+      {
+        path: 'question-mgmt/edit/:id',
+        component: _import('wechat-mgmt/add-question'),
+        name: '试题管理 / 编辑试题',
+        hidden: true,
+        meta: { role: ['admin'], isEdit: true }
+      },
+      {
         path: 'wechat-content',
         component: _import('wechat-mgmt/wechat-content'),
         name: '微信内容',
