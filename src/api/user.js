@@ -46,3 +46,11 @@ export function del(id) {
   })
 }
 
+export function roles(query) {
+  return fetch({
+    url: '/users/roles',
+    method: 'get',
+    params: query
+  })
+}
+

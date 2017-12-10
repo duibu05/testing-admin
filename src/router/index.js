@@ -129,7 +129,7 @@ export const asyncRouterMap = [
         meta: { role: ['admin'], isEdit: false }
       },
       {
-        path: 'lesson-mgmt/edit',
+        path: 'lesson-mgmt/edit/:id',
         component: _import('website-mgmt/add-lesson'),
         name: '课程管理 / 编辑课程',
         hidden: true,
@@ -149,7 +149,7 @@ export const asyncRouterMap = [
         meta: { role: ['admin'], isEdit: false }
       },
       {
-        path: 'website-content/edit',
+        path: 'website-content/edit/:id',
         component: _import('website-mgmt/add-wcontent'),
         name: '网站内容 / 编辑网站内容',
         hidden: true,
@@ -191,7 +191,7 @@ export const asyncRouterMap = [
         meta: { role: ['admin'], isEdit: false }
       },
       {
-        path: 'wechat-content/edit',
+        path: 'wechat-content/edit/:id',
         component: _import('wechat-mgmt/add-wcontent'),
         name: '微信内容 / 编辑微信内容',
         hidden: true,
@@ -290,6 +290,20 @@ export const asyncRouterMap = [
         component: _import('auth/roles'),
         name: '角色管理',
         meta: { role: ['admin'] }
+      },
+      {
+        path: 'roles/add',
+        component: _import('auth/add-role'),
+        name: '角色管理 / 添加角色',
+        hidden: true,
+        meta: { role: ['admin'], isEdit: false }
+      },
+      {
+        path: 'roles/edit/:id',
+        component: _import('auth/add-role'),
+        name: '角色管理 / 编辑角色',
+        hidden: true,
+        meta: { role: ['admin'], isEdit: true }
       }
     ]
   },

@@ -19,11 +19,15 @@ import { asyncRouterMap, constantRouterMap } from '@/router'
  * @param routes
  */
 function filterAsyncRouter(asyncRouterMap, routes) {
-  routes.push('profile')
+  routes.profile = '管理'
   const accessedRouters = asyncRouterMap.filter(route => {
-    if (routes.indexOf(route.path.substr(1)) !== -1) {
+    if (routes[route.path.substr(1)] === '管理' || route.path === '*') {
+      return true
+    } else if (routes[route.path.substr(1)] === '浏览') {
+      route.meta.readonly = true
       return true
     }
+
     return false
   })
   return accessedRouters
@@ -43,7 +47,7 @@ const permission = {
   actions: {
     GenerateRoutes({ commit }, user) {
       return new Promise(resolve => {
-        const accessedRouters = filterAsyncRouter(asyncRouterMap, user.routes)
+        const accessedRouters = filterAsyncRouter(asyncRouterMap, user.role.body)
         commit('SET_ROUTERS', accessedRouters)
         resolve()
       })

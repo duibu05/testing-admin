@@ -48,8 +48,8 @@ const user = {
     GetUserInfo({ commit, state }) {
       return new Promise((resolve, reject) => {
         getUserInfo(state.token).then(response => {
-          const data = response.data
-          commit('SET_ROLES', data.role)
+          const data = response.data.user
+          commit('SET_ROLES', data.role.type)
           commit('SET_ID', data._id)
           commit('SET_nickname', data.nickname)
           resolve(response)
@@ -103,7 +103,7 @@ const user = {
         setToken(role)
         getUserInfo(role).then(response => {
           const data = response.data
-          commit('SET_ROLES', data.role)
+          commit('SET_ROLES', data.role.type)
           commit('SET_NAME', data.name)
           resolve()
         })
