@@ -81,9 +81,10 @@ export default {
                 position: relative;
                 box-sizing: border-box;
                 img {
-                    width: 100%;
-                    height: 100%;
+                    height: 200px;
                     border-radius: 6px;
+                    width: 200px; 
+                    background: white;
                 }
             }
             .image-preview-action {

@@ -51,7 +51,7 @@
   </section>
 </template>
 <script>
-  import { fetchList, save, remove } from '@/api/category'
+  import { fetchList, save, del } from '@/api/restful'
   import Upload from '@/components/Upload/singleImage4'
 
   export default {
@@ -95,7 +95,7 @@
             this.activeName = this.form.cat
             this.dialogVisible = false
             this.showLoading = true
-            save('wechat', {}).then(response => {
+            save('category', { type: 'wechat-content', name: this.form.name, image: this.form.image }).then(response => {
               this.showLoading = false
               this.category[this.form.cat].list.push({
                 name: this.form.name,
@@ -118,7 +118,7 @@
         this.$confirm('确认删除？')
           .then(_ => {
             this.showLoading = true
-            remove('wechat', { key: key, index: index }).then(response => {
+            del('category', { key: key, index: index, type: 'wechat-content' }).then(response => {
               this.category[key].list = this.category[key].list.filter((v, idx) => idx !== index)
               this.showLoading = false
               this.$message.success('删除成功！')
@@ -128,14 +128,17 @@
       },
       handleClick(tab, event) {
         // console.log(tab, event)
+      },
+      fetchData() {
+        this.showLoading = true
+        fetchList('category/rebuild', { type: 'wechat-content' }).then(response => {
+          this.showLoading = false
+          this.category = response.data || {}
+        })
       }
     },
     created() {
-      this.showLoading = true
-      fetchList('wechat').then(response => {
-        this.showLoading = false
-        this.category = response.data || {}
-      })
+      this.fetchData()
     }
   }
 </script>
