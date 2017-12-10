@@ -10,7 +10,7 @@
               <div class="category-name">
                 <span>{{cat.name}}</span>
                 <div class="bottom clearfix">
-                  <el-button type="text" @click="confirmDel(key, index)" class="button">
+                  <el-button type="text" @click="confirmDel(key, index, cat._id)" class="button">
                     <i class="el-icon-delete"></i>
                   </el-button>
                 </div>
@@ -51,7 +51,7 @@
   </section>
 </template>
 <script>
-  import { fetchList, save, remove } from '@/api/category'
+  import { fetchList, save, del } from '@/api/restful'
   import Upload from '@/components/Upload/singleImage4'
 
   export default {
@@ -95,7 +95,7 @@
             this.activeName = this.form.cat
             this.dialogVisible = false
             this.showLoading = true
-            save('shiti', {}).then(response => {
+            save('category', { type: 'shiti', name: this.form.name, image: this.form.image, level: this.form.cat }).then(response => {
               this.showLoading = false
               this.category[this.form.cat].list.push({
                 name: this.form.name,
@@ -114,11 +114,11 @@
           })
           .catch(_ => {})
       },
-      confirmDel(key, index) {
+      confirmDel(key, index, id) {
         this.$confirm('确认删除？')
           .then(_ => {
             this.showLoading = true
-            remove('shiti', { key: key, index: index }).then(response => {
+            del('category', id).then(response => {
               this.category[key].list = this.category[key].list.filter((v, idx) => idx !== index)
               this.showLoading = false
               this.$message.success('删除成功！')
@@ -132,7 +132,7 @@
     },
     created() {
       this.showLoading = true
-      fetchList('shiti').then(response => {
+      fetchList('category/rebuild', { type: 'shiti' }).then(response => {
         this.showLoading = false
         this.category = response.data || {}
       })

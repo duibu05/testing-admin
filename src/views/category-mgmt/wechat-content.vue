@@ -10,7 +10,7 @@
               <div class="category-name">
                 <span>{{cat.name}}</span>
                 <div class="bottom clearfix">
-                  <el-button type="text" @click="confirmDel(key, index)" class="button">
+                  <el-button type="text" @click="confirmDel(key, index, cat._id)" class="button">
                     <i class="el-icon-delete"></i>
                   </el-button>
                 </div>
@@ -97,10 +97,7 @@
             this.showLoading = true
             save('category', { type: 'wechat-content', name: this.form.name, image: this.form.image }).then(response => {
               this.showLoading = false
-              this.category[this.form.cat].list.push({
-                name: this.form.name,
-                image: this.form.image
-              })
+              this.category[this.form.cat].list.push(response.data)
               this.resetForm()
             })
           }
@@ -114,11 +111,11 @@
           })
           .catch(_ => {})
       },
-      confirmDel(key, index) {
+      confirmDel(key, index, id) {
         this.$confirm('确认删除？')
           .then(_ => {
             this.showLoading = true
-            del('category', { key: key, index: index, type: 'wechat-content' }).then(response => {
+            del('category', id).then(response => {
               this.category[key].list = this.category[key].list.filter((v, idx) => idx !== index)
               this.showLoading = false
               this.$message.success('删除成功！')
