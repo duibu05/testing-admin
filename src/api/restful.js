@@ -8,9 +8,9 @@ export function fetchList(uri, query) {
   })
 }
 
-export function get(uri, query) {
+export function get(uri, id, query) {
   return fetch({
-    url: `/${uri}`,
+    url: `/${uri}/${id}`,
     method: 'get',
     params: query
   })

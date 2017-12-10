@@ -1,6 +1,6 @@
 <template>
   <section class="container">
-    <el-form :model="form" :rules="rules" ref="form" label-width="100px">
+    <el-form :model="form" :rules="rules" ref="form" label-width="100px" v-loading="showLoading" element-loading-text="请给我点时间...">
       <el-form-item label="内容标题" prop="title">
         <el-input placeholder="请输入内容标题" v-model="form.title"></el-input>
       </el-form-item>
@@ -45,6 +45,7 @@
 <script>
   import Tinymce from '@/components/Tinymce'
   import Upload from '@/components/Upload/singleImage4'
+  import { fetchList, get, save, update } from '@/api/restful'
 
   export default {
     components: {
@@ -53,6 +54,7 @@
     },
     data() {
       return {
+        showLoading: false,
         catOptions: [],
         form: {
           title: '',
@@ -98,13 +100,35 @@
         })
       },
       fetchData() {
+        this.showLoading = true
         // 通过接口获取数据
+        get('wechat-content', this.$route.params.id)
+          .then(res => {
+            this.form = res.data
+            this.showLoading = false
+          })
       },
       submitForm(formName) {
         this.$refs[formName].validate((valid) => {
           if (valid) {
-            alert('submit!')
-            console.log(this.form)
+            this.showLoading = true
+            let opt
+
+            if (this.isEdit) {
+              opt = update('wechat-content', this.$route.params.id, this.form)
+            } else {
+              opt = save('wechat-content', this.form)
+            }
+            opt.then(res => {
+              if (res.code === 0) {
+                this.$message.success('提交成功！')
+                this.showLoading = false
+                history.back()
+              } else {
+                this.showLoading = false
+                this.$message.error('提交失败！')
+              }
+            })
           } else {
             console.log('error submit!!')
             return false
@@ -116,19 +140,21 @@
       }
     },
     created() {
-      this.catOptions = [{
-        value: '选项1',
-        label: '考试须知'
-      }, {
-        value: '选项2',
-        label: '备考方法'
-      }, {
-        value: '选项3',
-        label: '考试辅导'
-      }, {
-        value: '选项4',
-        label: '暂不分类'
-      }]
+      fetchList('category', { type: 'wechat-content', level: 'first' })
+        .then(res => {
+          this.catOptions = res.data.list.map(v => {
+            const obj = {}
+            obj.value = v._id
+            obj.label = v.name
+
+            return obj
+          })
+          this.catOptions.push({
+            value: '',
+            label: '暂不分类'
+          })
+        })
+
       if (this.isEdit) {
         this.fetchData()
       }

@@ -1,11 +1,11 @@
 <template>
   <div class="app-container calendar-list-container">
     <div class="filter-container">
-      <el-input @keyup.enter.native="handleFilter" style="width: 200px;" class="filter-item" placeholder="内容标题" v-model="listQuery.title">
+      <el-input @keyup.enter.native="handleFilter" style="width: 200px;" class="filter-item" placeholder="内容标题" v-model="listQuery.keyword">
       </el-input>
 
       <el-select @change='handleFilter' style="width: 120px" class="filter-item" v-model="listQuery.cat" placeholder="内容分类">
-        <el-option v-for="item in catOptions" :key="item.key" :label="item.label" :value="item.key">
+        <el-option v-for="item in catOptions" :key="item.value" :label="item.label" :value="item.value">
         </el-option>
       </el-select>
 
@@ -19,25 +19,25 @@
         align="center"
         label="编号">
         <template scope="scope">
-            <span>{{scope.row.id}}</span>
+          <span>{{scope.$index+1+(listQuery.page-1)*listQuery.limit}}</span>
         </template>
       </el-table-column>
       <el-table-column
-        prop="stdName"
+        prop="title"
         label="内容标题"
         width="500">
       </el-table-column>
       <el-table-column
-        prop="pname"
+        prop="cat.name"
         label="内容分类">
       </el-table-column>
       <el-table-column
-        prop="meta.joinAt"
+        prop="createdAt"
         label="发布时间">
       </el-table-column>
       <el-table-column align="center" label="操作" width="200">
         <template scope="scope">
-          <el-button type="text" icon="edit" @click="goToAddWContent('edit')">编辑</el-button>
+          <el-button type="text" icon="edit" @click="goToAddWContent('edit', scope.row._id)">编辑</el-button>
           <el-button type="text" icon="delete">删除</el-button>
         </template>
       </el-table-column>
@@ -52,7 +52,7 @@
 </template>
 
 <script>
-import { fetchList } from '@/api/joiner'
+import { fetchList } from '@/api/restful'
 import waves from '@/directive/waves/index.js' // 水波纹指令
 import { parseTime } from '@/utils'
 
@@ -69,23 +69,35 @@ export default {
       listQuery: {
         page: 1,
         limit: 20,
-        title: undefined,
+        keyword: undefined,
         cat: undefined
       },
-      catOptions: [{ label: '考试须知', key: '' }, { label: '备考方法', key: 'test' }, { label: '考试辅导', key: 'lesson' }],
+      catOptions: [],
       tableKey: 0
     }
   },
   created() {
+    fetchList('category', { type: 'wechat-content', level: 'first' })
+      .then(res => {
+        this.catOptions = res.data.list.map(v => {
+          const obj = {}
+          obj.value = v._id
+          obj.label = v.name
+
+          return obj
+        })
+
+        console.log(this.catOptions)
+      })
     this.getList()
   },
   methods: {
-    goToAddWContent(action) {
-      this.$router.push({ path: '/wechat-mgmt/wechat-content/' + action })
+    goToAddWContent(action, id = '') {
+      this.$router.push({ path: `/wechat-mgmt/wechat-content/${action}/${id}` })
     },
     getList() {
       this.listLoading = true
-      fetchList(this.listQuery).then(response => {
+      fetchList('wechat-content', this.listQuery).then(response => {
         this.list = response.data.list
         this.total = response.data.total || 0
         this.listLoading = false
@@ -93,6 +105,8 @@ export default {
     },
     handleFilter() {
       this.listQuery.page = 1
+      this.listQuery.cat = this.listQuery.cat ? this.listQuery.cat : undefined
+      this.listQuery.keyword = this.listQuery.keyword ? this.listQuery.keyword : undefined
       this.getList()
     },
     handleSizeChange(val) {
