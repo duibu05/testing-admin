@@ -172,6 +172,20 @@ export const asyncRouterMap = [
         meta: { role: ['admin'] }
       },
       {
+        path: 'paper-mgmt/add',
+        component: _import('wechat-mgmt/add-paper'),
+        name: '试卷管理 / 添加试卷',
+        hidden: true,
+        meta: { role: ['admin'], isEdit: false }
+      },
+      {
+        path: 'paper-mgmt/edit/:id',
+        component: _import('wechat-mgmt/add-paper'),
+        name: '试卷管理 / 编辑试卷',
+        hidden: true,
+        meta: { role: ['admin'], isEdit: true }
+      },
+      {
         path: 'question-mgmt',
         component: _import('wechat-mgmt/question-mgmt'),
         name: '试题管理',

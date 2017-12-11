@@ -27,7 +27,7 @@
       <el-button class="filter-item" type="primary" v-waves icon="search" @click="handleFilter">搜索</el-button>
       <el-button class="filter-item" type="primary" icon="message">下载模板</el-button>
       <el-button class="filter-item" type="primary" icon="upload">表格导入</el-button>
-      <el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="edit">新增试卷</el-button>
+      <el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="edit" @click="goToAddPaper('add')">新增试卷</el-button>
     </div>
 
     <el-table :key='tableKey' :data="list" v-loading="listLoading" element-loading-text="拼命加载中..." border fit stripe highlight-current-row style="width: 100%" max-height="600">
@@ -36,41 +36,37 @@
         align="center"
         label="编号">
         <template scope="scope">
-            <span>{{scope.row.id}}</span>
+          <span>{{scope.$index+1+(listQuery.page-1)*listQuery.limit}}</span>
         </template>
       </el-table-column>
       <el-table-column
-        prop="stdName"
+        prop="title"
         label="试卷名称"
         width="400">
       </el-table-column>
       <el-table-column
-        prop="ptype"
+        prop="firstCat.name"
         label="试卷分类">
       </el-table-column>
       <el-table-column
-        prop="pid"
+        prop="secondCat.name"
         label="试卷子类">
       </el-table-column>
       <el-table-column
-        prop="pname"
+        prop="thirdCat.name"
         label="三级分类">
-      </el-table-column>
-      <el-table-column
-        prop="stdName"
-        label="创建人">
       </el-table-column>
       <el-table-column
         label="试卷分数">
         <template scope="scope">100</template>
       </el-table-column>
       <el-table-column
-        prop="meta.joinAt"
+        prop="createdAt"
         label="创建时间">
       </el-table-column>
       <el-table-column align="center" label="操作" width="200">
         <template scope="scope">
-          <el-button type="text" icon="edit">编辑</el-button>
+          <el-button type="text" icon="edit" @click="goToAddPaper('edit', scope.row._id)">编辑</el-button>
           <el-button type="text" icon="delete">删除</el-button>
         </template>
       </el-table-column>
@@ -85,12 +81,12 @@
 </template>
 
 <script>
-import { fetchList } from '@/api/joiner'
+import { fetchList } from '@/api/restful'
 import waves from '@/directive/waves/index.js' // 水波纹指令
 import { parseTime } from '@/utils'
 
 export default {
-  name: 'joiner-table',
+  name: 'paper-table',
   directives: {
     waves
   },
@@ -121,9 +117,12 @@ export default {
     this.getList()
   },
   methods: {
+    goToAddPaper(action, id = '') {
+      this.$router.push({ path: `/wechat-mgmt/paper-mgmt/${action}/${id}` })
+    },
     getList() {
       this.listLoading = true
-      fetchList(this.listQuery).then(response => {
+      fetchList('paper', this.listQuery).then(response => {
         this.list = response.data.list
         this.total = response.data.total || 0
         this.listLoading = false
