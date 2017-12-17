@@ -4,7 +4,7 @@
       <el-form-item label="试题标题" prop="title">
         <el-input placeholder="请输入试题标题" v-model="form.title"></el-input>
       </el-form-item>
-      <el-form-item label="试题分类">
+      <el-form-item label="试题分类" prop="firstCat">
         <el-select v-model="form.firstCat" value-key="id" clearable placeholder="请选择">
           <el-option
             v-for="item in catOptions"
@@ -51,9 +51,18 @@
 </template>
 
 <script>
-  import { fetchList, update, save } from '@/api/restful'
+  import { fetchList, update, save, get } from '@/api/restful'
   export default {
     data() {
+      const validateCat = (rule, value, callback) => {
+        if (this.form.firstCat === '' || this.form.firstCat.id === '') {
+          callback(new Error('请选择试题分类'))
+        }
+        if (this.form.secondCat === '' || this.form.secondCat.id === '') {
+          callback(new Error('请选择题型分类'))
+        }
+        callback()
+      }
       return {
         catOptions: [],
         subCatOptions: [],
@@ -72,6 +81,26 @@
         rules: {
           title: [
             { required: true, message: '请输入试题标题！' }
+          ],
+          rightAnswer: [
+            { required: true, message: '请输入正确答案！' }
+          ],
+          answers: [
+            { required: true, message: '请输入选项！' }
+          ],
+          firstCat: [
+            { required: true, message: '请选择试题分类！' },
+            { validator: validateCat, message: '请选择试题分类' }
+          ],
+          secondCat: [
+            { required: true, message: '请选择题型分类！' },
+            { validator: validateCat, message: '请选择题型分类' }
+          ],
+          body: [
+            { required: true, message: '请输入题干！' }
+          ],
+          analysis: [
+            { required: true, message: '请输入答案解析！' }
           ]
         }
       }
@@ -97,6 +126,17 @@
       },
       fetchData() {
         // 通过接口获取数据
+        get('question', this.$route.params.id).then(res => {
+          this.form = {
+            rightAnswer: res.data.rightAnswer,
+            title: res.data.title,
+            answers: res.data.answers,
+            firstCat: res.data.firstCat,
+            secondCat: res.data.secondCat,
+            body: res.data.body,
+            analysis: res.data.analysis
+          }
+        })
       },
       submitForm(formName) {
         this.$refs[formName].validate((valid) => {

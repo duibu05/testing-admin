@@ -30,10 +30,49 @@
           </el-option>
         </el-select>
       </el-form-item>
+      <el-form-item label="试题管理">
+        <div>
+          <div class="filter-container">
+            <el-input @keyup.enter.native="handleFilter" style="width: 200px;" class="filter-item" placeholder="试题名称" v-model="listQuery.keyword">
+            </el-input>
+            <el-button class="filter-item" type="primary" v-waves icon="search" @click="handleFilter">搜索</el-button>
+          </div>
+          <el-table :key='1' :data="tempQuestions" border fit stripe highlight-current-row style="width: 100%" max-height="600">
+            <el-table-column
+              width="65"
+              align="center"
+              label="编号">
+              <template scope="scope">
+                <span>{{scope.$index+1+(listQuery.page-1)*listQuery.limit}}</span>
+              </template>
+            </el-table-column>
+            <el-table-column
+              prop="title"
+              label="试题名称">
+            </el-table-column>
+            <el-table-column
+              prop="secondCat"
+              label="题型分类">
+            </el-table-column>
+            <el-table-column
+              label="试题分数">
+              <template scope="scope">
+                <el-input style="width: 60px;" class="filter-item" placeholder="请输入试题分数" v-model="scope.row.points">
+                </el-input>
+              </template>
+            </el-table-column>
+            <el-table-column
+              label="试题管理">
+              <template scope="scope">
+                <el-button type="text" icon="delete" @click="deleteQuestion(scope.row.id)">删除</el-button>
+              </template>
+            </el-table-column>
+          </el-table>
+        </div>
+      </el-form-item>
       <el-form-item>
         <el-button type="primary" @click="showDialog = true">添加试题</el-button>
         <el-button type="primary" @click="submitForm('form')">保存并发布</el-button>
-        <el-button @click="resetForm('form')">重置</el-button>
       </el-form-item>
     </el-form>
 
@@ -46,12 +85,12 @@
           <el-input @keyup.enter.native="getList" style="width: 200px;" class="filter-item" placeholder="学员姓名" v-model="dialogListQuery.keyword">
           </el-input>
 
-          <el-select @change='getList' style="width: 120px" class="filter-item" v-model="dialogListQuery.dialogFirstCat" placeholder="类别">
+          <el-select @change='getList' style="width: 120px" class="filter-item" v-model="dialogListQuery['firstCat.id']" placeholder="类别">
             <el-option v-for="item in dialogCatOptions" :key="item.id" :label="item.name" :value="item.id">
             </el-option>
           </el-select>
 
-          <el-select @change='getList' style="width: 120px" class="filter-item" v-model="dialogListQuery.dialogSecondCat" placeholder="类别">
+          <el-select @change='getList' style="width: 120px" class="filter-item" v-model="dialogListQuery['secondCat.id']" placeholder="类别">
             <el-option v-for="item in dialogSubCatOptions" :key="item.id" :label="item.name" :value="item.id">
             </el-option>
           </el-select>
@@ -91,13 +130,23 @@
 </template>
 
 <script>
-  import { fetchList, update, save } from '@/api/restful'
+  import { fetchList, update, save, get } from '@/api/restful'
+  import waves from '@/directive/waves/index.js' // 水波纹指令
   export default {
+    directives: {
+      waves
+    },
     data() {
       return {
+        listQuery: {
+          keyword: undefined,
+          page: 1,
+          limit: 20
+        },
         dialogListQuery: {
-          dialogFirstCat: undefined,
-          dialogSecondCat: undefined
+          'firstCat.id': undefined,
+          'secondCat.id': undefined,
+          keyword: undefined
         },
         dialogCatOptions: undefined,
         dialogSubCatOptions: undefined,
@@ -108,6 +157,7 @@
         catOptions: [],
         subCatOptions: [],
         thirdCatOptions: [],
+        tempQuestions: [],
         form: {
           title: '',
           firstCat: '',
@@ -128,6 +178,17 @@
       }
     },
     methods: {
+      deleteQuestion(id) {
+        this.$confirm('确认删除该试题?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          this.form.questions = this.form.questions.filter(v => v.id !== id)
+          this.handleFilter()
+          this.$message('已临时删除该试题，点击保存并发布后将永久删除！')
+        }).catch(() => {})
+      },
       selectQuestion(obj) {
         this.$prompt('请输入分数！', '提示', {
           confirmButtonText: '确定',
@@ -142,6 +203,7 @@
             secondCat: obj.secondCat.name,
             points: value
           })
+          this.handleFilter()
           this.$message({
             type: 'success',
             message: '试题已临时加入试卷中，请记得点击保存并发布'
@@ -173,6 +235,16 @@
       },
       fetchData() {
         // 通过接口获取数据
+        get('paper', this.$route.params.id).then(res => {
+          this.form = {
+            title: res.data.title,
+            firstCat: res.data.firstCat,
+            secondCat: res.data.secondCat,
+            thirdCat: res.data.thirdCat,
+            questions: res.data.questions
+          }
+          this.tempQuestions = [].concat(this.form.questions)
+        })
       },
       submitForm(formName) {
         this.$refs[formName].validate((valid) => {
@@ -203,6 +275,10 @@
       },
       resetForm(formName) {
         this.$refs[formName].resetFields()
+      },
+      handleFilter() {
+        const reg = new RegExp(this.listQuery.keyword)
+        this.tempQuestions = this.form.questions.filter(v => reg.test(v.title))
       }
     },
     created() {

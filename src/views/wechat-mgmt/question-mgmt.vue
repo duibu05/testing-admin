@@ -4,17 +4,17 @@
       <el-input @keyup.enter.native="handleFilter" style="width: 200px;" class="filter-item" placeholder="试题名称" v-model="listQuery.keyword">
       </el-input>
 
-      <el-select @change='handleFilter' style="width: 120px" class="filter-item" v-model="listQuery.cat" placeholder="试题分类">
+      <el-select clearable @change='handleFilter' style="width: 120px" class="filter-item" v-model="listQuery['firstCat.id']" placeholder="试题分类">
         <el-option v-for="item in catOptions" :key="item.key" :label="item.label" :value="item.key">
         </el-option>
       </el-select>
 
-      <el-select @change='handleFilter' style="width: 120px" class="filter-item" v-model="listQuery.qtype" placeholder="题型子类">
+      <el-select clearable @change='handleFilter' style="width: 120px" class="filter-item" v-model="listQuery['secondCat.id']" placeholder="题型分类">
         <el-option v-for="item in qtypeOptions" :key="item.key" :label="item.label" :value="item.key">
         </el-option>
       </el-select>
 
-      <el-select @change='handleFilter' style="width: 160px" class="filter-item" v-model="listQuery.sort" placeholder="排序">
+      <el-select clearable @change='handleFilter' style="width: 160px" class="filter-item" v-model="listQuery.sort" placeholder="排序">
         <el-option v-for="item in sortOptions" :key="item.key" :label="item.label" :value="item.key">
         </el-option>
       </el-select>
@@ -54,7 +54,7 @@
       <el-table-column align="center" label="操作" width="200">
         <template scope="scope">
           <el-button type="text" icon="edit" @click="goToAddQuestion('edit', scope.row._id)">编辑</el-button>
-          <el-button type="text" icon="delete">删除</el-button>
+          <el-button type="text" icon="delete" @click="deleteQuestion(scope.row._id)">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -68,7 +68,7 @@
 </template>
 
 <script>
-import { fetchList } from '@/api/restful'
+import { fetchList, del } from '@/api/restful'
 import waves from '@/directive/waves/index.js' // 水波纹指令
 import { parseTime } from '@/utils'
 
@@ -79,18 +79,16 @@ export default {
   },
   data() {
     return {
-      sortOptions: [{ label: '按创建时间升序', key: '+id' }, { label: '按创建时间降序', key: '-id' }],
+      sortOptions: [{ label: '按创建时间升序', key: '+createdAt' }, { label: '按创建时间降序', key: '-createdAt' }],
       list: null,
       total: null,
       listLoading: true,
       listQuery: {
         page: 1,
         limit: 20,
-        stdName: undefined,
-        stdPhone: undefined,
         sort: undefined,
-        type: undefined,
-        cat: undefined
+        'secondCat.id': undefined,
+        'firstCat.id': undefined
       },
       catOptions: [],
       qtypeOptions: [],
@@ -101,7 +99,7 @@ export default {
     fetchList('category', { type: 'shiti', level: 'first' }).then(res => {
       this.catOptions = res.data.list.map(v => {
         const obj = {}
-        obj.value = v._id
+        obj.key = v._id
         obj.label = v.name
 
         return obj
@@ -110,7 +108,7 @@ export default {
     fetchList('category', { type: 'shiti', level: 'second' }).then(res => {
       this.qtypeOptions = res.data.list.map(v => {
         const obj = {}
-        obj.value = v._id
+        obj.key = v._id
         obj.label = v.name
 
         return obj
@@ -119,6 +117,18 @@ export default {
     this.getList()
   },
   methods: {
+    deleteQuestion(id) {
+      this.$confirm('此操作将永久删除该试题, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        del('question', id).then(res => {
+          this.$message.success('删除成功！')
+          this.getList()
+        })
+      }).catch(() => {})
+    },
     goToAddQuestion(action, id = '') {
       this.$router.push({ path: `/wechat-mgmt/question-mgmt/${action}/${id}` })
     },
