@@ -1,7 +1,7 @@
 <template>
   <div class="app-container calendar-list-container">
     <div class="filter-container">
-      <el-input @keyup.enter.native="handleFilter" style="width: 200px;" class="filter-item" placeholder="课程名称" v-model="listQuery.stdName">
+      <el-input @keyup.enter.native="handleFilter" style="width: 200px;" class="filter-item" placeholder="课程名称" v-model="listQuery.keyword">
       </el-input>
 
       <el-select @change='handleFilter' style="width: 120px" class="filter-item" v-model="listQuery.status" placeholder="课程状态">
@@ -10,7 +10,7 @@
       </el-select>
 
       <el-select @change='handleFilter' style="width: 120px" class="filter-item" v-model="listQuery.cat" placeholder="课程分类">
-        <el-option v-for="item in catOptions" :key="item.key" :label="item.label" :value="item.key">
+        <el-option v-for="item in catOptions" :key="item" :label="item" :value="item">
         </el-option>
       </el-select>
 
@@ -29,30 +29,31 @@
         align="center"
         label="编号">
         <template scope="scope">
-            <span>{{scope.row.id}}</span>
+          <span>{{scope.$index+1+(listQuery.page-1)*listQuery.limit}}</span>
         </template>
       </el-table-column>
       <el-table-column
-        prop="stdName"
+        prop="title"
         label="课程名称">
       </el-table-column>
       <el-table-column
-        prop="ptype"
         label="课程状态">
+        <template scope="scope">{{scope.row.status === 1?'招生中':'已下架'}}</template>
       </el-table-column>
       <el-table-column
-        prop="ptype"
+        prop="cat"
         label="课程分类">
       </el-table-column>
       <el-table-column
-        prop="meta.joinAt"
         label="开课时间">
+        <template scope="scope">{{new Date(scope.row.startTime).getTime() | parseTime}}</template>
       </el-table-column>
       <el-table-column align="center" label="操作" width="300">
         <template scope="scope">
-          <el-button type="text" icon="edit" @click="goToAddLesson('edit')">编辑</el-button>
-          <el-button type="text" icon="setting">下架</el-button>
-          <el-button type="text" icon="delete">删除</el-button>
+          <el-button type="text" icon="edit" @click="goToAddLesson('edit', scope.row._id)">编辑</el-button>
+          <el-button type="text" v-if="scope.row.status === 1" icon="setting" @click="toggleLesson(scope.row._id, 0)">下架</el-button>
+          <el-button type="text" v-if="scope.row.status !== 1" icon="setting" @click="toggleLesson(scope.row._id, 1)">上架</el-button>
+          <el-button type="text" icon="delete" @click="deleteLesson(scope.row._id)">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -66,7 +67,7 @@
 </template>
 
 <script>
-import { fetchList } from '@/api/joiner'
+import { fetchList, del, update } from '@/api/restful'
 import waves from '@/directive/waves/index.js' // 水波纹指令
 import { parseTime } from '@/utils'
 
@@ -77,36 +78,61 @@ export default {
   },
   data() {
     return {
-      sortOptions: [{ label: '按开课时间升序', key: '+id' }, { label: '按开课时间降序', key: '-id' }],
+      sortOptions: [{ label: '按开课时间升序', key: '+startTime' }, { label: '按开课时间降序', key: '-startTime' }],
       list: null,
       total: null,
       listLoading: true,
       listQuery: {
         page: 1,
         limit: 20,
-        stdName: undefined,
-        stdPhone: undefined,
+        keyword: undefined,
         sort: undefined,
-        type: undefined,
         cat: undefined,
         status: undefined
       },
-      catOptions: [{ label: '教师资格', key: '' }, { label: '司法考试', key: 'test' }],
-      statusOptions: [{ label: '招生中', key: '' }, { label: '已下架', key: 'test' }],
-      ptypeOptions: [{ label: '全部', key: '' }, { label: '考试报名', key: 'test' }, { label: '课程报名', key: 'lesson' }],
+      catOptions: [],
+      statusOptions: [{ label: '招生中', key: 1 }, { label: '已下架', key: 0 }],
       tableKey: 0
     }
   },
   created() {
     this.getList()
+    fetchList('category/rebuild', { type: 'web-content' }).then(res => {
+      this.catOptions = res.data.first.list.map(v => v.name)
+    })
   },
   methods: {
-    goToAddLesson(action) {
-      this.$router.push({ path: '/website-mgmt/lesson-mgmt/' + action })
+    deleteLesson(id) {
+      this.$confirm('此操作将永久删除该课程, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        del('lesson', id).then(res => {
+          this.$message.success('操作成功！')
+          this.getList()
+        })
+      }).catch(() => {})
+    },
+    toggleLesson(id, status) {
+      const tips = status === 0 ? '此操作将下架该课程, 是否继续?' : '此操作将上架该课程, 是否继续?'
+      this.$confirm(tips, '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        update('lesson', id, { status: status }).then(res => {
+          this.$message.success('操作成功！')
+          this.getList()
+        })
+      }).catch(() => {})
+    },
+    goToAddLesson(action, id = '') {
+      this.$router.push({ path: `/website-mgmt/lesson-mgmt/${action}/${id}` })
     },
     getList() {
       this.listLoading = true
-      fetchList(this.listQuery).then(response => {
+      fetchList('lessons', this.listQuery).then(response => {
         this.list = response.data.list
         this.total = response.data.total || 0
         this.listLoading = false

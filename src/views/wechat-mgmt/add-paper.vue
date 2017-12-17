@@ -258,14 +258,9 @@
               opt = save('paper', this.form)
             }
             opt.then(res => {
-              if (res.code === 0) {
-                this.$message.success('提交成功！')
-                this.showLoading = false
-                history.back()
-              } else {
-                this.showLoading = false
-                this.$message.error('提交失败！')
-              }
+              this.$message.success('提交成功！')
+              this.showLoading = false
+              history.back()
             })
           } else {
             console.log('error submit!!')

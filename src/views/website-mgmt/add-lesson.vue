@@ -1,20 +1,20 @@
 <template>
-  <section class="container">
+  <section class="container" v-loading="showLoading">
     <el-form :inline="true" :model="form" :rules="rules" ref="form" label-width="100px">
       <el-form-item label="课程名称" prop="title">
         <el-input placeholder="请输入课程名称" v-model="form.title"></el-input>
       </el-form-item>
-      <el-form-item label="课程分类">
+      <el-form-item label="课程分类" prop="cat">
         <el-select v-model="form.cat" clearable placeholder="请选择">
           <el-option
             v-for="item in catOptions"
-            :key="item.value"
-            :label="item.label"
-            :value="item.value">
+            :key="item"
+            :label="item"
+            :value="item">
           </el-option>
         </el-select>
       </el-form-item>
-      <el-form-item label="课程海报" class="item-fluid">
+      <el-form-item label="课程海报" class="item-fluid" prop="post">
         <Upload class="post-image" v-model="form.post"></Upload>
       </el-form-item>
       <el-form-item label="课程数" prop="kecheng">
@@ -30,7 +30,13 @@
         <el-input placeholder="请输入上课地点" v-model="form.place"></el-input>
       </el-form-item>
       <el-form-item label="开课时间" prop="startTime">
-        <el-input placeholder="请输入开课时间" v-model="form.startTime"></el-input>
+        <el-date-picker
+          v-model="form.startTime"
+          type="datetime"
+          placeholder="选择开课时间"
+          align="right"
+          :picker-options="pickerOptions">
+        </el-date-picker>
       </el-form-item>
       <el-form-item label="报名费用" prop="cost">
         <el-input placeholder="请输入报名费用" v-model="form.cost"></el-input>
@@ -47,10 +53,14 @@
       <el-form-item label="课程详情" class="item-fluid" prop="content">
         <tinymce style="min-width: 740px" :height=200 ref="editor" v-model="form.content"></tinymce>
       </el-form-item>
-      <el-form-item label="相关课程" class="item-fluid" prop="releatedLesson">
+      <el-form-item v-if="releatedLessonData.length" label="相关课程" class="item-fluid">
         <el-transfer
           filterable
           :titles="['所有课程', '相关课程']"
+          :props="{
+            key: 'id',
+            label: 'title'
+          }"
           :filter-method="filterMethod"
           filter-placeholder="请输入课程名称"
           v-model="form.releatedLesson"
@@ -67,6 +77,7 @@
 </template>
 
 <script>
+  import { fetchList, save, update, get } from '@/api/restful'
   import Tinymce from '@/components/Tinymce'
   import Upload from '@/components/Upload/singleImage4'
 
@@ -75,23 +86,38 @@
       Tinymce,
       Upload
     },
-    data() {
-      const generateData2 = _ => {
-        const data = []
-        const cities = ['课程一', '课程二', '课程三', '课程四', '课程五', '课程六', '课程七']
-        const pinyin = ['kechengyi', 'kechenger', 'kechengsan', 'kechengsi', 'kechengwu', 'kechengliu', 'kechengqi']
-        cities.forEach((city, index) => {
-          data.push({
-            label: city,
-            key: index,
-            pinyin: pinyin[index]
-          })
-        })
-        return data
+    watch: {
+      'form.cat': function() {
+        this.fetchRelatedLessons()
       }
+    },
+    data() {
       return {
+        pickerOptions: {
+          shortcuts: [{
+            text: '今天',
+            onClick(picker) {
+              picker.$emit('pick', new Date())
+            }
+          }, {
+            text: '明天',
+            onClick(picker) {
+              const date = new Date()
+              date.setTime(date.getTime() + 3600 * 1000 * 24)
+              picker.$emit('pick', date)
+            }
+          }, {
+            text: '一周后',
+            onClick(picker) {
+              const date = new Date()
+              date.setTime(date.getTime() + 3600 * 1000 * 24 * 7)
+              picker.$emit('pick', date)
+            }
+          }]
+        },
+        showLoading: false,
         catOptions: [],
-        releatedLessonData: generateData2(),
+        releatedLessonData: [],
         form: {
           title: '',
           cat: '',
@@ -104,9 +130,16 @@
           place: '',
           startTime: '',
           cost: '',
+          status: 1, // 默认上架
           releatedLesson: []
         },
         rules: {
+          cat: [
+            { required: true, message: '请选择课程分类' }
+          ],
+          post: [
+            { required: true, message: '请上传课程海报' }
+          ],
           title: [
             { required: true, message: '请输入课程名称！' }
           ],
@@ -138,19 +171,66 @@
     },
     methods: {
       filterMethod(query, item) {
-        return item.pinyin.indexOf(query) > -1
+        return item.title.indexOf(query) > -1
       },
       fetchData() {
+        this.showLoading = true
         // 通过接口获取数据
+        get('lesson', this.$route.params.id).then(res => {
+          this.showLoading = false
+          this.form = {
+            title: res.data.title,
+            cat: res.data.cat,
+            brief: res.data.brief,
+            post: res.data.post,
+            content: res.data.content,
+            kecheng: res.data.kecheng,
+            keshi: res.data.keshi,
+            xingshi: res.data.xingshi,
+            place: res.data.place,
+            startTime: res.data.startTime,
+            cost: res.data.cost,
+            releatedLesson: res.data.releatedLesson
+          }
+        }).catch(() => {
+          this.showLoading = false
+        })
       },
       submitForm(formName) {
         this.$refs[formName].validate((valid) => {
           if (valid) {
-            alert('submit!')
-            console.log(this.form)
+            this.showLoading = true
+            let opt
+
+            if (this.isEdit) {
+              opt = update('lesson', this.$route.params.id, this.form)
+            } else {
+              opt = save('lesson', this.form)
+            }
+            opt.then(res => {
+              this.$message.success('提交成功！')
+              this.showLoading = false
+              history.back()
+            })
           } else {
             console.log('error submit!!')
             return false
+          }
+        })
+      },
+      fetchRelatedLessons() {
+        fetchList('lessons', { cat: this.form.cat }).then(res => {
+          this.releatedLessonData = res.data.list.map(v => {
+            return {
+              id: v._id,
+              post: v.post,
+              cost: v.cost,
+              place: v.place,
+              title: v.title
+            }
+          })
+          if (this.isEdit) {
+            this.releatedLessonData = this.releatedLessonData.filter(v => v.id !== this.$route.params.id)
           }
         })
       },
@@ -159,16 +239,12 @@
       }
     },
     created() {
-      this.catOptions = [{
-        value: '选项1',
-        label: '教师资格'
-      }, {
-        value: '选项2',
-        label: '司法考试'
-      }, {
-        value: '选项3',
-        label: '暂不分类'
-      }]
+      fetchList('category/rebuild', { type: 'web-content' }).then(res => {
+        this.catOptions = res.data.first.list.map(v => v.name)
+
+        this.catOptions.push('暂不分类')
+      })
+
       if (this.isEdit) {
         this.fetchData()
       }
