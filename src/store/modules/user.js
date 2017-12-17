@@ -6,6 +6,7 @@ const user = {
     status: '',
     token: getToken(),
     nickname: '',
+    phone: '',
     id: '',
     roles: []
   },
@@ -17,8 +18,11 @@ const user = {
     SET_STATUS: (state, status) => {
       state.status = status
     },
-    SET_nickname: (state, nickname) => {
+    SET_NICKNAME: (state, nickname) => {
       state.nickname = nickname
+    },
+    SET_PHONE: (state, phone) => {
+      state.phone = phone
     },
     SET_ID: (state, id) => {
       state.id = id
@@ -51,7 +55,8 @@ const user = {
           const data = response.data.user
           commit('SET_ROLES', data.role.type)
           commit('SET_ID', data._id)
-          commit('SET_nickname', data.nickname)
+          commit('SET_NICKNAME', data.nickname)
+          commit('SET_PHONE', data.phone)
           resolve(response)
         }).catch(error => {
           reject(error)
@@ -104,9 +109,25 @@ const user = {
         getUserInfo(role).then(response => {
           const data = response.data
           commit('SET_ROLES', data.role.type)
-          commit('SET_NAME', data.name)
           resolve()
         })
+      })
+    },
+
+    // 修改当前用户昵称
+    ChangeNicknme({ commit }, nickname) {
+      return new Promise(resolve => {
+        commit('SET_NICKNAME', nickname)
+        resolve()
+      })
+    },
+
+    // 修改当前用户信息
+    ChangeUserInfo({ commit }, user) {
+      return new Promise(resolve => {
+        commit('SET_NICKNAME', user.nickname)
+        commit('SET_PHONE', user.phone)
+        resolve()
       })
     }
   }

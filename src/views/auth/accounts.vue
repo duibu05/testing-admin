@@ -354,6 +354,9 @@ export default {
           update(id, this.updateform)
             .then(res => {
               this.$message.success('修改成功！')
+              if (this.id === id) {
+                this.$store.dispatch('ChangeNicknme', this.updateform.nickname)
+              }
               this.listLoading = false
               this.$refs[formName].resetFields()
               this.getList()

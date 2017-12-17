@@ -31,6 +31,14 @@ export function resetPassword(id, data) {
   })
 }
 
+export function checkPassword(id, data) {
+  return fetch({
+    url: `/users/reset-password/${id}`,
+    method: 'post',
+    data: data
+  })
+}
+
 export function update(id, data) {
   return fetch({
     url: `/users/${id}`,

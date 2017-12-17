@@ -19,6 +19,9 @@
 </template>
 
 <script>
+  import { mapGetters } from 'vuex'
+  import { resetPassword, checkPassword } from '@/api/user'
+
   export default {
     data() {
       const validatePass = (rule, value, callback) => {
@@ -41,6 +44,7 @@
         }
       }
       return {
+        showLoading: false,
         form: {
           pass: '',
           checkPass: '',
@@ -61,11 +65,35 @@
         }
       }
     },
+    computed: {
+      ...mapGetters([
+        'id'
+      ])
+    },
     methods: {
       submitForm(formName) {
         this.$refs[formName].validate((valid) => {
           if (valid) {
-            alert('submit!')
+            this.showLoading = true
+            checkPassword(this.id, { password: this.form.oldpass }).then(res => {
+              if (res.code === 0) {
+                resetPassword(this.id, { password: this.form.pass }).then(res => {
+                  if (res.code === 0) {
+                    this.$alert('修改成功，请重新登录！', '提示', {
+                      confirmButtonText: '确定'
+                    }).then(() => {
+                      this.$store.dispatch('FedLogOut').then(() => {
+                        location.reload() // 为了重新实例化vue-router对象 避免bug
+                      })
+                    }).catch(() => {
+                      this.$store.dispatch('FedLogOut').then(() => {
+                        location.reload() // 为了重新实例化vue-router对象 避免bug
+                      })
+                    })
+                  }
+                })
+              }
+            })
           } else {
             console.log('error submit!!')
             return false
