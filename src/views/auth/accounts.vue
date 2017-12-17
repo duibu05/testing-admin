@@ -1,13 +1,14 @@
 <template>
   <div class="app-container calendar-list-container">
     <div class="filter-container">
-      <el-input @keyup.enter.native="handleFilter" style="width: 200px;" class="filter-item" placeholder="请输入用户昵称" v-model="listQuery.stdName">
+      <el-input @keyup.enter.native="handleFilter" style="width: 200px;" class="filter-item" placeholder="请输入昵称" v-model="listQuery.keyword">
       </el-input>
 
-      <el-input @keyup.enter.native="handleFilter" style="width: 200px;" class="filter-item" placeholder="手机号码" v-model="listQuery.stdPhone">
+      <el-input @keyup.enter.native="handleFilter" style="width: 200px;" class="filter-item" placeholder="手机号码" v-model="listQuery.phone">
       </el-input>
 
       <el-button class="filter-item" type="primary" v-waves icon="search" @click="handleFilter">搜索</el-button>
+      <el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="plus" @click="showAddAdminDialog">新增管理员</el-button>
     </div>
 
     <el-table :key='tableKey' :data="list" v-loading="listLoading" :element-loading-text="loadingText" border fit stripe highlight-current-row style="width: 100%" max-height="600">
@@ -36,8 +37,10 @@
         label="联系方式">
       </el-table-column>
       <el-table-column
-        prop="status"
         label="账号状态">
+        <template scope="scope">
+          <span>{{scope.row.status === 1? '已启用' : '已关闭'}}</span>
+        </template>
       </el-table-column>
       <el-table-column width="300" align="center" label="操作">
         <template scope="scope">
@@ -54,6 +57,43 @@
         :page-sizes="[10,20,30, 50]" :page-size="listQuery.limit" layout="total, sizes, prev, pager, next, jumper" :total="total">
       </el-pagination>
     </div>
+
+    <el-dialog
+      title="添加管理员"
+      :visible.sync="addDialogVisible"
+      size="tiny">
+      <el-form :model="addform" :rules="addAdminRules" ref="addform" label-width="100px">
+        <el-form-item label="昵称" prop="nickname">
+          <el-input type="text" v-model="addform.nickname" auto-complete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="账号" prop="account">
+          <el-input type="text" v-model="addform.account" auto-complete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="角色" prop="role">
+          <el-select v-model="addform.role.name" clearable placeholder="请选择">
+            <el-option
+              v-for="item in roles"
+              :key="item.name"
+              :label="item.name"
+              :value="item.name">
+            </el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="联系方式" prop="phone">
+          <el-input type="text" v-model="addform.phone" auto-complete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="密码" prop="addpass">
+          <el-input type="password" v-model="addform.password" auto-complete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="确认密码" prop="addCheckPass">
+          <el-input type="password" v-model="addform.checkPass" auto-complete="off"></el-input>
+        </el-form-item>
+      </el-form>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="addDialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="addAdmin('addform')">提交</el-button>
+      </span>
+    </el-dialog>
 
     <el-dialog
         title="重置密码"
@@ -77,7 +117,7 @@
 
 <script>
 import { mapGetters } from 'vuex'
-import { fetchList, resetPassword } from '@/api/user'
+import { fetchList, resetPassword, save, roles } from '@/api/user'
 import waves from '@/directive/waves/index.js' // 水波纹指令
 
 export default {
@@ -110,6 +150,7 @@ export default {
       loadingText: '拼命加载中...',
       currentUserId: '',
       dialogVisible: false,
+      addDialogVisible: false,
       list: null,
       total: null,
       listLoading: true,
@@ -117,11 +158,48 @@ export default {
         page: 1,
         limit: 20
       },
+      roles: [],
       tableKey: 0,
+      addform: {
+        nickname: '',
+        account: '',
+        role: {
+          name: ''
+        },
+        phone: '',
+        password: '',
+        checkPass: ''
+      },
       form: {
         pass: '',
         checkPass: '',
         oldpass: ''
+      },
+      addAdminRules: {
+        password: [
+          { required: true, message: '密码为必填项！' },
+          { validator: validatePass, trigger: 'blur' }
+        ],
+        nickname: [
+          { required: true, message: '昵称为必填项！' },
+          { validator: validatePass, trigger: 'blur' }
+        ],
+        account: [
+          { required: true, message: '账户为必填项！' },
+          { validator: validatePass, trigger: 'blur' }
+        ],
+        phone: [
+          { required: true, message: '联系方式为必填项！' },
+          { validator: validatePass, trigger: 'blur' }
+        ],
+        role: [
+          { required: true, message: '角色为必填项！' },
+          { validator: validatePass, trigger: 'change' }
+        ],
+        checkPass: [
+          { required: true, message: '确认密码为必填项！' },
+          { validator: validatePass2, trigger: 'blur' }
+        ]
       },
       rules: {
         pass: [
@@ -131,9 +209,6 @@ export default {
         checkPass: [
           { required: true, message: '确认密码为必填项！' },
           { validator: validatePass2, trigger: 'blur' }
-        ],
-        oldpass: [
-          { required: true, message: '旧密码为必填项！' }
         ]
       }
     }
@@ -147,6 +222,31 @@ export default {
     ])
   },
   methods: {
+    addAdmin(formName) {
+      this.$refs[formName].validate((valid) => {
+        if (valid) {
+          this.addDialogVisible = false
+          this.listLoading = true
+          this.loadingText = '拼命提交中...'
+          save(this.addform)
+            .then(res => {
+              this.$message.success('添加成功！')
+              this.listLoading = false
+              this.$refs[formName].resetFields()
+              this.getList()
+            })
+        } else {
+          console.log('error submit!!')
+          return false
+        }
+      })
+    },
+    showAddAdminDialog() {
+      this.addDialogVisible = true
+      roles().then(res => {
+        this.roles = res.data.list
+      })
+    },
     showResetPwdDialog(id) {
       this.dialogVisible = true
       this.currentUserId = id

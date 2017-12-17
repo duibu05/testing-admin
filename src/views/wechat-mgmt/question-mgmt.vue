@@ -20,7 +20,7 @@
       </el-select>
 
       <el-button class="filter-item" type="primary" v-waves icon="search" @click="handleFilter">搜索</el-button>
-      <el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="edit" @click="goToAddQuestion('add')">新增试题</el-button>
+      <el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="plus" @click="goToAddQuestion('add')">新增试题</el-button>
     </div>
 
     <el-table :key='tableKey' :data="list" v-loading="listLoading" element-loading-text="拼命加载中..." border fit stripe highlight-current-row style="width: 100%" max-height="600">

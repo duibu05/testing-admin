@@ -27,7 +27,7 @@
       <el-button class="filter-item" type="primary" v-waves icon="search" @click="handleFilter">搜索</el-button>
       <el-button class="filter-item" type="primary" icon="message">下载模板</el-button>
       <el-button class="filter-item" type="primary" icon="upload">表格导入</el-button>
-      <el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="edit" @click="goToAddPaper('add')">新增试卷</el-button>
+      <el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="plus" @click="goToAddPaper('add')">新增试卷</el-button>
     </div>
 
     <el-table :key='tableKey' :data="list" v-loading="listLoading" element-loading-text="拼命加载中..." border fit stripe highlight-current-row style="width: 100%" max-height="600">
