@@ -44,9 +44,10 @@
       </el-table-column>
       <el-table-column width="300" align="center" label="操作">
         <template scope="scope">
-          <el-button type="text" class="circle-close"> 关闭</el-button>
-          <el-button type="text" icon="edit">编辑</el-button>
-          <el-button type="text" icon="delete">删除</el-button>
+          <el-button v-if="scope.row.status === 1" type="text" class="circle-close" @click="disOrEnableAccount(scope.row._id, 0)">关闭</el-button>
+          <el-button v-if="scope.row.status === 0" type="text" class="circle-close" @click="disOrEnableAccount(scope.row._id, 1)">开启</el-button>
+          <el-button type="text" icon="edit" @click="showUpdateAdminDialog(scope.row._id)">编辑</el-button>
+          <el-button type="text" icon="delete" @click="delAccount(scope.row._id)">删除</el-button>
           <el-button type="text" icon="setting" @click="showResetPwdDialog(scope.row._id)">重置密码</el-button>
         </template>
       </el-table-column>
@@ -69,8 +70,8 @@
         <el-form-item label="账号" prop="account">
           <el-input type="text" v-model="addform.account" auto-complete="off"></el-input>
         </el-form-item>
-        <el-form-item label="角色" prop="role">
-          <el-select v-model="addform.role.name" clearable placeholder="请选择">
+        <el-form-item label="角色" prop="roleName">
+          <el-select v-model="addform.roleName" clearable placeholder="请选择">
             <el-option
               v-for="item in roles"
               :key="item.name"
@@ -82,16 +83,47 @@
         <el-form-item label="联系方式" prop="phone">
           <el-input type="text" v-model="addform.phone" auto-complete="off"></el-input>
         </el-form-item>
-        <el-form-item label="密码" prop="addpass">
+        <el-form-item label="密码" prop="password">
           <el-input type="password" v-model="addform.password" auto-complete="off"></el-input>
         </el-form-item>
         <el-form-item label="确认密码" prop="addCheckPass">
-          <el-input type="password" v-model="addform.checkPass" auto-complete="off"></el-input>
+          <el-input type="password" v-model="addform.addCheckPass" auto-complete="off"></el-input>
         </el-form-item>
       </el-form>
       <span slot="footer" class="dialog-footer">
         <el-button @click="addDialogVisible = false">取 消</el-button>
         <el-button type="primary" @click="addAdmin('addform')">提交</el-button>
+      </span>
+    </el-dialog>
+
+    <el-dialog
+      title="修改管理员"
+      :visible.sync="updateDialogVisible"
+      size="tiny">
+      <el-form v-loading="showUpdateLoading" :rules="updateAdminRules" :model="updateform" ref="updateform" label-width="100px">
+        <el-form-item label="昵称" prop="nickname">
+          <el-input type="text" v-model="updateform.nickname" auto-complete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="账号">
+          <el-input type="text" :disabled="true" v-model="updateform.account" auto-complete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="角色">
+          <el-select v-model="updateform.role.name" placeholder="请选择">
+            <el-option
+              v-for="item in roles"
+              :key="item.name"
+              :label="item.name"
+              :value="item.name">
+            </el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="联系方式" prop="phone">
+          <el-input type="text" v-model="updateform.phone" auto-complete="off"></el-input>
+        </el-form-item>
+      </el-form>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="updateDialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="updateAdmin('updateform')">提交</el-button>
       </span>
     </el-dialog>
 
@@ -117,7 +149,7 @@
 
 <script>
 import { mapGetters } from 'vuex'
-import { fetchList, resetPassword, save, roles } from '@/api/user'
+import { fetchList, resetPassword, save, roles, update, del } from '@/api/user'
 import waves from '@/directive/waves/index.js' // 水波纹指令
 
 export default {
@@ -129,6 +161,8 @@ export default {
     const validatePass = (rule, value, callback) => {
       if (value === '') {
         callback(new Error('请输入密码'))
+      } else if (value.length < 6) {
+        callback(new Error('密码不能小于6位！'))
       } else {
         if (this.form.checkPass !== '') {
           this.$refs.form.validateField('checkPass')
@@ -146,17 +180,43 @@ export default {
       }
     }
 
+    const validatePassword = (rule, value, callback) => {
+      if (value === '') {
+        callback(new Error('请输入密码'))
+      } else if (value.length < 6) {
+        callback(new Error('密码不能小于6位！'))
+      } else {
+        if (this.addform.checkPass !== '') {
+          this.$refs.addform.validateField('addCheckPass')
+        }
+        callback()
+      }
+    }
+    const validatePassword2 = (rule, value, callback) => {
+      if (value === '') {
+        callback(new Error('请再次输入密码'))
+      } else if (value !== this.addform.password) {
+        callback(new Error('两次输入密码不一致!'))
+      } else {
+        callback()
+      }
+    }
+
     return {
       loadingText: '拼命加载中...',
+      showUpdateLoading: false,
       currentUserId: '',
       dialogVisible: false,
       addDialogVisible: false,
+      updateDialogVisible: false,
       list: null,
       total: null,
       listLoading: true,
       listQuery: {
         page: 1,
-        limit: 20
+        limit: 20,
+        phone: '',
+        keyword: ''
       },
       roles: [],
       tableKey: 0,
@@ -166,39 +226,49 @@ export default {
         role: {
           name: ''
         },
+        roleName: '',
         phone: '',
         password: '',
         checkPass: ''
+      },
+      updateform: {
+        _id: '',
+        nickname: '',
+        account: '',
+        role: {
+          name: ''
+        },
+        phone: ''
       },
       form: {
         pass: '',
         checkPass: '',
         oldpass: ''
       },
+      updateAdminRules: {
+        nickname: [{ required: true, message: '昵称为必填项！' }],
+        phone: [{ required: true, message: '联系方式为必填项！' }]
+      },
       addAdminRules: {
         password: [
           { required: true, message: '密码为必填项！' },
-          { validator: validatePass, trigger: 'blur' }
+          { validator: validatePassword, trigger: 'blur' }
         ],
         nickname: [
-          { required: true, message: '昵称为必填项！' },
-          { validator: validatePass, trigger: 'blur' }
+          { required: true, message: '昵称为必填项！' }
         ],
         account: [
-          { required: true, message: '账户为必填项！' },
-          { validator: validatePass, trigger: 'blur' }
+          { required: true, message: '账户为必填项！' }
         ],
         phone: [
-          { required: true, message: '联系方式为必填项！' },
-          { validator: validatePass, trigger: 'blur' }
+          { required: true, message: '联系方式为必填项！' }
         ],
-        role: [
-          { required: true, message: '角色为必填项！' },
-          { validator: validatePass, trigger: 'change' }
+        roleName: [
+          { required: true, message: '角色为必填项！' }
         ],
-        checkPass: [
+        addCheckPass: [
           { required: true, message: '确认密码为必填项！' },
-          { validator: validatePass2, trigger: 'blur' }
+          { validator: validatePassword2, trigger: 'blur' }
         ]
       },
       rules: {
@@ -222,9 +292,41 @@ export default {
     ])
   },
   methods: {
+    disOrEnableAccount(id, status) {
+      const tips = status === 0 ? '此操作将停用该账号，并导致相关管理员无法登陆，是否继续?' : '此操作将启用该账号，是否继续?'
+      this.$confirm(tips, '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        update(id, { status: status, token: '' }).then(res => {
+          this.$message.success('操作成功！')
+          this.getList()
+        })
+      }).catch(() => {
+        this.$message.warning('操作取消！')
+      })
+    },
+    delAccount(id) {
+      this.$confirm('此操作将永久删除该账户，是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        del(id).then(res => {
+          this.$message.success('删除成功！')
+          this.getList()
+        })
+      }).catch(() => {
+        this.$message.warning('操作取消！')
+      })
+    },
     addAdmin(formName) {
       this.$refs[formName].validate((valid) => {
         if (valid) {
+          this.addform.role.name = this.addform.roleName
+          delete this.addform.roleName
+
           this.addDialogVisible = false
           this.listLoading = true
           this.loadingText = '拼命提交中...'
@@ -241,8 +343,51 @@ export default {
         }
       })
     },
+    updateAdmin(formName) {
+      this.$refs[formName].validate((valid) => {
+        if (valid) {
+          this.updateDialogVisible = false
+          this.listLoading = true
+          this.loadingText = '拼命提交中...'
+          const id = this.updateform._id
+          delete this.updateform._id
+          update(id, this.updateform)
+            .then(res => {
+              this.$message.success('修改成功！')
+              this.listLoading = false
+              this.$refs[formName].resetFields()
+              this.getList()
+            })
+        } else {
+          console.log('error submit!!')
+          return false
+        }
+      })
+    },
     showAddAdminDialog() {
       this.addDialogVisible = true
+      this.$refs.addform && this.$refs.addform.resetFields()
+      roles().then(res => {
+        this.roles = res.data.list
+      })
+    },
+    showUpdateAdminDialog(id) {
+      if (id) {
+        this.showUpdateLoading = true
+        fetchList({ _id: id }).then(res => {
+          this.showUpdateLoading = false
+          if (res.code === 0 && res.data.list.length > 0) {
+            const data = res.data.list[0]
+            this.updateform._id = data._id
+            this.updateform.nickname = data.nickname
+            this.updateform.account = data.account
+            this.updateform.role.name = data.role.name
+            this.updateform.phone = data.phone
+          }
+        })
+      }
+      this.updateDialogVisible = true
+      this.$refs.updateform && this.$refs.updateform.resetFields()
       roles().then(res => {
         this.roles = res.data.list
       })
@@ -250,6 +395,7 @@ export default {
     showResetPwdDialog(id) {
       this.dialogVisible = true
       this.currentUserId = id
+      this.$refs.form && this.$refs.form.resetFields()
     },
     submitForm(formName) {
       this.$refs[formName].validate((valid) => {
@@ -257,7 +403,7 @@ export default {
           this.dialogVisible = false
           this.listLoading = true
           this.loadingText = '拼命提交中...'
-          resetPassword(this.currentUserId, { password: this.form.pass, token: '' })
+          resetPassword(this.currentUserId, { password: this.form.pass })
             .then(res => {
               this.$message.success('修改成功！')
               this.listLoading = false

@@ -8,18 +8,18 @@ export function fetchList(query) {
   })
 }
 
-export function get(query) {
+export function get(id) {
   return fetch({
-    url: '/users/' + query,
+    url: `/users/${id}`,
     method: 'get'
   })
 }
 
-export function save(query) {
+export function save(data) {
   return fetch({
     url: '/users',
     method: 'post',
-    data: query
+    data: data
   })
 }
 
