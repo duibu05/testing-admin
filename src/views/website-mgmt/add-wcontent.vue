@@ -1,6 +1,6 @@
 <template>
   <section class="container">
-    <el-form :model="form" :rules="rules" ref="form" label-width="100px">
+    <el-form :model="form" v-loading="showLoading" :rules="rules" ref="form" label-width="100px">
       <el-form-item label="内容标题" prop="title">
         <el-input placeholder="请输入内容标题" v-model="form.title"></el-input>
       </el-form-item>
@@ -19,22 +19,22 @@
         <el-select v-model="form.cat" clearable placeholder="请选择">
           <el-option
             v-for="item in catOptions"
-            :key="item.value"
-            :label="item.label"
-            :value="item.value">
+            :key="item"
+            :label="item"
+            :value="item">
           </el-option>
         </el-select>
         <el-select v-model="form.subCat" clearable placeholder="请选择">
           <el-option
             v-for="item in subCatOptions"
-            :key="item.value"
-            :label="item.label"
-            :value="item.value">
+            :key="item"
+            :label="item"
+            :value="item">
           </el-option>
         </el-select>
       </el-form-item>
       <el-form-item label="附件">
-        <Upload v-model="form.attachments"></Upload>
+        <Upload v-model="form.attachments" :files="form.attachments || {}"></Upload>
       </el-form-item>
       <el-form-item label="内容详情" prop="content">
         <tinymce :height=200 ref="editor" v-model="form.content"></tinymce>
@@ -48,6 +48,7 @@
 </template>
 
 <script>
+  import { fetchList, save, update, get } from '@/api/restful'
   import Tinymce from '@/components/Tinymce'
   import Upload from '@/components/Upload/fileUpload'
 
@@ -58,6 +59,7 @@
     },
     data() {
       return {
+        showLoading: false,
         catOptions: [],
         subCatOptions: [],
         form: {
@@ -96,13 +98,36 @@
         })
       },
       fetchData() {
+        this.showLoading = true
         // 通过接口获取数据
+        get('web-content', this.$route.params.id).then(res => {
+          this.showLoading = false
+          this.form = {
+            title: res.data.title,
+            keywords: res.data.keywords,
+            cat: res.data.cat,
+            subCat: res.data.subCat,
+            attachments: res.data.attachments,
+            content: res.data.content
+          }
+        })
       },
       submitForm(formName) {
         this.$refs[formName].validate((valid) => {
           if (valid) {
-            alert('submit!')
-            console.log(this.form)
+            this.showLoading = true
+            let opt
+
+            if (this.isEdit) {
+              opt = update('web-content', this.$route.params.id, this.form)
+            } else {
+              opt = save('web-content', this.form)
+            }
+            opt.then(res => {
+              this.$message.success('提交成功！')
+              this.showLoading = false
+              history.back()
+            })
           } else {
             console.log('error submit!!')
             return false
@@ -114,35 +139,12 @@
       }
     },
     created() {
-      this.catOptions = [{
-        value: '选项1',
-        label: '教师资格'
-      }, {
-        value: '选项2',
-        label: '司法考试'
-      }, {
-        value: '选项3',
-        label: '暂不分类'
-      }]
-      this.subCatOptions = [{
-        value: '选项1',
-        label: '资格介绍'
-      }, {
-        value: '选项2',
-        label: '考试指南'
-      }, {
-        value: '选项3',
-        label: '答疑专区'
-      }, {
-        value: '选项4',
-        label: '考试技巧'
-      }, {
-        value: '选项5',
-        label: '备考资料'
-      }, {
-        value: 'werewr',
-        label: '历年真题'
-      }]
+      fetchList('category/rebuild', { type: 'web-content' }).then(res => {
+        this.catOptions = res.data.first.list.map(v => v.name)
+        this.catOptions.push('暂未分类')
+        this.subCatOptions = res.data.second.list.map(v => v.name)
+        this.subCatOptions.push('暂未分类')
+      })
       if (this.isEdit) {
         this.fetchData()
       }

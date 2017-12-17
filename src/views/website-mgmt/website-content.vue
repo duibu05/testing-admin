@@ -1,16 +1,16 @@
 <template>
   <div class="app-container calendar-list-container">
     <div class="filter-container">
-      <el-input @keyup.enter.native="handleFilter" style="width: 200px;" class="filter-item" placeholder="内容标题" v-model="listQuery.title">
+      <el-input @keyup.enter.native="handleFilter" style="width: 200px;" class="filter-item" placeholder="内容标题" v-model="listQuery.keyword">
       </el-input>
 
-      <el-select @change='handleFilter' style="width: 120px" class="filter-item" v-model="listQuery.cat" placeholder="内容分类">
-        <el-option v-for="item in catOptions" :key="item.key" :label="item.label" :value="item.key">
+      <el-select clearable @change='handleFilter' style="width: 120px" class="filter-item" v-model="listQuery.cat" placeholder="内容分类">
+        <el-option v-for="item in catOptions" :key="item" :label="item" :value="item">
         </el-option>
       </el-select>
 
-      <el-select @change='handleFilter' style="width: 120px" class="filter-item" v-model="listQuery.subcat" placeholder="内容子类">
-        <el-option v-for="item in subcatOptions" :key="item.key" :label="item.label" :value="item.key">
+      <el-select clearable @change='handleFilter' style="width: 120px" class="filter-item" v-model="listQuery.subCat" placeholder="内容子类">
+        <el-option v-for="item in subCatOptions" :key="item" :label="item" :value="item">
         </el-option>
       </el-select>
 
@@ -24,30 +24,30 @@
         align="center"
         label="编号">
         <template scope="scope">
-            <span>{{scope.row.id}}</span>
+          <span>{{scope.$index+1+(listQuery.page-1)*listQuery.limit}}</span>
         </template>
       </el-table-column>
       <el-table-column
-        prop="stdName"
+        prop="title"
         label="内容标题"
         width="500">
       </el-table-column>
       <el-table-column
-        prop="pname"
+        prop="cat"
         label="内容分类">
       </el-table-column>
       <el-table-column
-        prop="joinFrom"
+        prop="subCat"
         label="内容子类">
       </el-table-column>
       <el-table-column
-        prop="meta.joinAt"
         label="发布时间">
+        <template scope="scope">{{new Date(scope.row.createdAt).getTime() | parseTime}}</template>
       </el-table-column>
       <el-table-column align="center" label="操作" width="200">
         <template scope="scope">
-          <el-button type="text" icon="edit" @click="goToAddWContent('edit')">编辑</el-button>
-          <el-button type="text" icon="delete">删除</el-button>
+          <el-button type="text" icon="edit" @click="goToAddWContent('edit', scope.row._id)">编辑</el-button>
+          <el-button type="text" icon="delete" @click="deleteContent(scope.row._id)">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -61,12 +61,12 @@
 </template>
 
 <script>
-import { fetchList } from '@/api/joiner'
+import { fetchList, del } from '@/api/restful'
 import waves from '@/directive/waves/index.js' // 水波纹指令
 import { parseTime } from '@/utils'
 
 export default {
-  name: 'joiner-table',
+  name: 'webcontent-table',
   directives: {
     waves
   },
@@ -78,25 +78,43 @@ export default {
       listQuery: {
         page: 1,
         limit: 20,
-        title: undefined,
+        keyword: undefined,
         cat: undefined,
-        subcat: undefined
+        subCat: undefined
       },
-      catOptions: [{ label: '教师资格', key: '' }, { label: '司法考试', key: 'test' }, { label: '暂未分类', key: 'lesson' }],
-      subcatOptions: [{ label: '资格介绍', key: '' }, { label: '暂未分类', key: 'test' }],
+      catOptions: [],
+      subCatOptions: [],
       tableKey: 0
     }
   },
   created() {
     this.getList()
+    fetchList('category/rebuild', { type: 'web-content' }).then(res => {
+      this.catOptions = res.data.first.list.map(v => v.name)
+      this.catOptions.push('暂未分类')
+      this.subCatOptions = res.data.second.list.map(v => v.name)
+      this.subCatOptions.push('暂未分类')
+    })
   },
   methods: {
-    goToAddWContent(action) {
-      this.$router.push({ path: '/website-mgmt/website-content/' + action })
+    deleteContent(id) {
+      this.$confirm('此操作将永久删除该内容, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        del('web-content', id).then(res => {
+          this.$message.success('删除成功！')
+          this.getList()
+        })
+      }).catch(() => {})
+    },
+    goToAddWContent(action, id = '') {
+      this.$router.push({ path: `/website-mgmt/website-content/${action}/${id}` })
     },
     getList() {
       this.listLoading = true
-      fetchList(this.listQuery).then(response => {
+      fetchList('web-content', this.listQuery).then(response => {
         this.list = response.data.list
         this.total = response.data.total || 0
         this.listLoading = false

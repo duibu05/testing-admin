@@ -4,17 +4,17 @@
       <el-input @keyup.enter.native="handleFilter" style="width: 200px;" class="filter-item" placeholder="课程名称" v-model="listQuery.keyword">
       </el-input>
 
-      <el-select @change='handleFilter' style="width: 120px" class="filter-item" v-model="listQuery.status" placeholder="课程状态">
+      <el-select clearable @change='handleFilter' style="width: 120px" class="filter-item" v-model="listQuery.status" placeholder="课程状态">
         <el-option v-for="item in statusOptions" :key="item.key" :label="item.label" :value="item.key">
         </el-option>
       </el-select>
 
-      <el-select @change='handleFilter' style="width: 120px" class="filter-item" v-model="listQuery.cat" placeholder="课程分类">
+      <el-select clearable @change='handleFilter' style="width: 120px" class="filter-item" v-model="listQuery.cat" placeholder="课程分类">
         <el-option v-for="item in catOptions" :key="item" :label="item" :value="item">
         </el-option>
       </el-select>
 
-      <el-select @change='handleFilter' style="width: 160px" class="filter-item" v-model="listQuery.sort" placeholder="排序">
+      <el-select clearable @change='handleFilter' style="width: 160px" class="filter-item" v-model="listQuery.sort" placeholder="排序">
         <el-option v-for="item in sortOptions" :key="item.key" :label="item.label" :value="item.key">
         </el-option>
       </el-select>
