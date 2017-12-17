@@ -109,8 +109,11 @@
     },
     methods: {
       fetchData() {
-        fetchSidebar().then(response => {
-          const data = response.data
+        fetchSidebar({ page: 1, limit: 1 }).then(response => {
+          if (!response.code === 0 || !response.data || !response.data.list) {
+            return
+          }
+          const data = response.data.list[0]
           this.postForm.phone = data.phone
           this.postForm.qq = data.qq
           this.postForm.wechatQRCodeURL = data.wechatQRCodeURL

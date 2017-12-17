@@ -2,7 +2,7 @@ import fetch from '@/utils/fetch'
 
 export function fetchSidebar(query) {
   return fetch({
-    url: '/right-sidebar',
+    url: '/side-bar',
     method: 'get',
     params: query
   })
@@ -10,9 +10,9 @@ export function fetchSidebar(query) {
 
 export function saveSidebar(params) {
   return fetch({
-    url: '/right-sidebar',
+    url: '/side-bar',
     method: 'post',
-    params: params
+    data: params
   })
 }
 

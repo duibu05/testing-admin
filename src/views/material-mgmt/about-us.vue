@@ -1,5 +1,5 @@
 <template>
-  <div class="createPost-container">
+  <div class="createPost-container" v-loading="showLoading">
     <el-form class="form-container" :model="postForm" :rules="rules" ref="postForm">
 
       <sticky :className="'sub-navbar '+postForm.status">
@@ -18,34 +18,26 @@
             <el-row>
 
               <el-col :span="8">
-                <el-form-item class="input" prop="hotline">
-                  <MDinput name="name" v-model="postForm.hotline" required :maxlength="100">
-                    咨询热线
-                  </MDinput>
+                <el-form-item label="咨询热线" prop="hotline">
+                  <el-input placeholder="请输入咨询热线" v-model="postForm.hotline"></el-input>
                 </el-form-item>
               </el-col>
 
               <el-col :span="8">
-                <el-form-item class="input" prop="complaintPhone">
-                  <MDinput name="name" v-model="postForm.complaintPhone" required :maxlength="100">
-                    投诉电话
-                  </MDinput>
+                <el-form-item label="投诉电话" prop="complaintPhone">
+                  <el-input placeholder="请输入投诉电话" v-model="postForm.complaintPhone"></el-input>
                 </el-form-item>
               </el-col>
 
               <el-col :span="8">
-                <el-form-item class="input" prop="email">
-                  <MDinput name="name" v-model="postForm.email" required :maxlength="100">
-                    E-mail
-                  </MDinput>
+                <el-form-item label="E-mail" prop="email">
+                  <el-input placeholder="请输入E-mail" v-model="postForm.email"></el-input>
                 </el-form-item>
               </el-col>
 
               <el-col :span="24">
-                <el-form-item class="input" prop="address">
-                  <MDinput name="name" v-model="postForm.address" required :maxlength="100">
-                    地址
-                  </MDinput>
+                <el-form-item label="地址" prop="address">
+                  <el-input placeholder="请输入地址" v-model="postForm.address"></el-input>
                 </el-form-item>
               </el-col>
             </el-row>
@@ -59,7 +51,7 @@
         
 
         <div class="editor-container">
-          <tinymce :height=400 ref="editor" v-model="postForm.content"></tinymce>
+          <tinymce :height=400 ref="editor" v-model="postForm.comBrief"></tinymce>
         </div>
 
       </div>
@@ -71,17 +63,18 @@
 <script>
 import Tinymce from '@/components/Tinymce'
 import Upload from '@/components/Upload/singleImage4'
-import MDinput from '@/components/MDinput'
 import Sticky from '@/components/Sticky' // 粘性header组件
+import { fetchList, save } from '@/api/restful'
 
 export default {
   name: 'articleDetail',
-  components: { Tinymce, MDinput, Upload, Sticky },
+  components: { Tinymce, Upload, Sticky },
   data() {
     return {
+      showLoading: false,
       postForm: {
         hotline: '',
-        content: '请输入公司介绍......',
+        comBrief: '请输入公司介绍......',
         complaintPhone: '',
         email: '',
         address: '',
@@ -99,25 +92,44 @@ export default {
     }
   },
   created() {
+    this.showLoading = true
     this.fetchData()
   },
   methods: {
     fetchData() {
-
+      fetchList('about-us', { page: 1, limit: 1 }).then(res => {
+        this.showLoading = false
+        if (res.code === 0 && res.data && res.data.list) {
+          const data = res.data.list[0]
+          this.postForm = {
+            hotline: data.hotline,
+            comBrief: data.comBrief,
+            complaintPhone: data.complaintPhone,
+            email: data.email,
+            address: data.address,
+            addressMap: data.addressMap
+          }
+        }
+      }).catch(() => {
+        this.showLoading = false
+      })
     },
     submitForm() {
-      this.postForm.display_time = parseInt(this.display_time / 1000)
       this.$refs.postForm.validate(valid => {
         if (valid) {
           this.loading = true
-          this.$notify({
-            title: '成功',
-            message: '发布文章成功',
-            type: 'success',
-            duration: 2000
+          save('about-us', this.postForm).then(res => {
+            if (res.code === 0) {
+              this.$notify({
+                title: '成功',
+                message: '发布成功',
+                type: 'success',
+                duration: 2000
+              })
+              this.postForm.status = 'published'
+              this.loading = false
+            }
           })
-          this.postForm.status = 'published'
-          this.loading = false
         } else {
           console.log('error submit!!')
           return false
