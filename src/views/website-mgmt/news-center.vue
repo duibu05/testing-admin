@@ -4,7 +4,7 @@
       <el-input @keyup.enter.native="handleFilter" style="width: 200px;" class="filter-item" placeholder="新闻标题" v-model="listQuery.keyword">
       </el-input>
 
-      <el-select @change='handleFilter' style="width: 160px" class="filter-item" v-model="listQuery.sort" placeholder="排序">
+      <el-select clearable @change='handleFilter' style="width: 160px" class="filter-item" v-model="listQuery.sort" placeholder="排序">
         <el-option v-for="item in sortOptions" :key="item.key" :label="item.label" :value="item.key">
         </el-option>
       </el-select>
@@ -93,6 +93,7 @@ export default {
         del(id).then(res => {
           if (res.code === 0) {
             this.$message.success('删除成功！')
+            this.getList()
           } else {
             this.$message.error('删除失败！')
           }
