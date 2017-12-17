@@ -36,8 +36,10 @@
         label="手机号码">
       </el-table-column>
       <el-table-column
-        prop="createdAt"
         label="注册时间">
+        <template scope="scope">
+          <span>{{new Date(scope.row.createdAt).getTime() | parseTime}}</span>
+        </template>
       </el-table-column>
     </el-table>
 

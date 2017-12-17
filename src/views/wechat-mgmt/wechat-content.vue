@@ -4,7 +4,7 @@
       <el-input @keyup.enter.native="handleFilter" style="width: 200px;" class="filter-item" placeholder="内容标题" v-model="listQuery.keyword">
       </el-input>
 
-      <el-select @change='handleFilter' style="width: 120px" class="filter-item" v-model="listQuery.cat" placeholder="内容分类">
+      <el-select clearable @change='handleFilter' style="width: 120px" class="filter-item" v-model="listQuery.cat" placeholder="内容分类">
         <el-option v-for="item in catOptions" :key="item.value" :label="item.label" :value="item.value">
         </el-option>
       </el-select>
@@ -28,17 +28,19 @@
         width="500">
       </el-table-column>
       <el-table-column
-        prop="cat.name"
+        prop="catName"
         label="内容分类">
       </el-table-column>
       <el-table-column
-        prop="createdAt"
         label="发布时间">
+        <template scope="scope">
+          <span>{{new Date(scope.row.createdAt).getTime() | parseTime}}</span>
+        </template>
       </el-table-column>
       <el-table-column align="center" label="操作" width="200">
         <template scope="scope">
           <el-button type="text" icon="edit" @click="goToAddWContent('edit', scope.row._id)">编辑</el-button>
-          <el-button type="text" icon="delete">删除</el-button>
+          <el-button type="text" icon="delete" @click="deleteContent(scope.row._id)">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -52,7 +54,7 @@
 </template>
 
 <script>
-import { fetchList } from '@/api/restful'
+import { fetchList, del } from '@/api/restful'
 import waves from '@/directive/waves/index.js' // 水波纹指令
 import { parseTime } from '@/utils'
 
@@ -90,6 +92,18 @@ export default {
     this.getList()
   },
   methods: {
+    deleteContent(id) {
+      this.$confirm('此操作将永久删除该内容, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        del('wechat-content', id).then(res => {
+          this.$message.success('删除成功！')
+          this.getList()
+        })
+      }).catch(() => {})
+    },
     goToAddWContent(action, id = '') {
       this.$router.push({ path: `/wechat-mgmt/wechat-content/${action}/${id}` })
     },

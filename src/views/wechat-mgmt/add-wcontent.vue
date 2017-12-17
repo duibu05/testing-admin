@@ -114,6 +114,8 @@
             this.showLoading = true
             let opt
 
+            this.form.catName = this.catOptions.filter(v => v.value === this.form.cat)[0].label
+
             if (this.isEdit) {
               opt = update('wechat-content', this.$route.params.id, this.form)
             } else {
