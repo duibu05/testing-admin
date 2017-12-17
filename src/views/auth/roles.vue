@@ -5,25 +5,99 @@
     </div>
     <el-table :key='tableKey' :data="list" v-loading="listLoading" :element-loading-text="loadingText" border fit stripe highlight-current-row style="width: 100%" max-height="600">
       <el-table-column
+        width="65"
+        align="center"
+        label="编号">
+        <template scope="scope">
+          <span>{{scope.$index+1+(listQuery.page-1)*listQuery.limit}}</span>
+        </template>
+      </el-table-column>
+      
+      <el-table-column
         prop="name"
         label="角色名称">
       </el-table-column>
+      
       <el-table-column
-        prop="stdName"
-        label="头像">
+        label="报名管理">
+        <template scope="scope">
+          <span v-if="scope.row.body">
+            {{scope.row.body['joiner-mgmt']}}
+          </span>
+          <span v-else>-</span>
+        </template>
       </el-table-column>
+
       <el-table-column
-        prop="pname"
-        label="昵称">
+        label="推荐管理">
+        <template scope="scope">
+          <span v-if="scope.row.body">
+            {{scope.row.body['carousel-mgmt']}}
+          </span>
+          <span v-else>-</span>
+        </template>
       </el-table-column>
+
       <el-table-column
-        prop="stdPhone"
-        label="手机号码">
+        label="网站管理">
+        <template scope="scope">
+          <span v-if="scope.row.body">
+            {{scope.row.body['website-mgmt']}}
+          </span>
+          <span v-else>-</span>
+        </template>
       </el-table-column>
+
       <el-table-column
-        prop="meta.joinAt"
-        label="注册时间">
+        label="微信管理">
+        <template scope="scope">
+          <span v-if="scope.row.body">
+            {{scope.row.body['wechat-mgmt']}}
+          </span>
+          <span v-else>-</span>
+        </template>
       </el-table-column>
+
+      <el-table-column
+        label="素材管理">
+        <template scope="scope">
+          <span v-if="scope.row.body">
+            {{scope.row.body['material-mgmt']}}
+          </span>
+          <span v-else>-</span>
+        </template>
+      </el-table-column>
+
+      <el-table-column
+        label="分类管理">
+        <template scope="scope">
+          <span v-if="scope.row.body">
+            {{scope.row.body['category-mgmt']}}
+          </span>
+          <span v-else>-</span>
+        </template>
+      </el-table-column>
+
+      <el-table-column
+        label="用户管理">
+        <template scope="scope">
+          <span v-if="scope.row.body">
+            {{scope.row.body['user-mgmt']}}
+          </span>
+          <span v-else>-</span>
+        </template>
+      </el-table-column>
+
+      <el-table-column
+        label="账号管理">
+        <template scope="scope">
+          <span v-if="scope.row.body">
+            {{scope.row.body['auth']}}
+          </span>
+          <span v-else>-</span>
+        </template>
+      </el-table-column>
+      
       <el-table-column align="center" label="操作" width="300">
         <template scope="scope">
           <el-button type="text" icon="edit" @click="addRole('edit', scope.row._id)">编辑</el-button>
