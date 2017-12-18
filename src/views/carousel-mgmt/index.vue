@@ -37,7 +37,7 @@
       
       <div class="app-container calendar-list-container">
         <div class="filter-container">
-          <el-input @keyup.enter.native="getList" style="width: 200px;" class="filter-item" placeholder="学员姓名" v-model="listQuery.keyword">
+          <el-input @keyup.enter.native="getList" style="width: 200px;" class="filter-item" placeholder="请输入关键字" v-model="listQuery.keyword">
           </el-input>
 
           <el-select @change='getList' style="width: 120px" class="filter-item" v-model="listQuery.type" placeholder="类别">
@@ -64,7 +64,7 @@
         <el-button @click="clearDialog">取 消</el-button>
         <el-button type="primary" :disabled="!selectWhichOne" @click="submitDialog">确 定</el-button>
       </span>
-    </el-dialog>  
+    </el-dialog>
   </div>
 </template>
 
@@ -74,7 +74,7 @@
 
   import waves from '@/directive/waves/index.js' // 水波纹指令
 
-  import { fetchList } from '@/api/joiner'
+  import { fetchList } from '@/api/restful'
 
   export default {
     name: 'tabEdit',
@@ -102,10 +102,9 @@
         list: null,
         listLoading: false,
         listQuery: {
-          title: '',
           type: ''
         },
-        ptypeOptions: [{ label: '网站内容', key: '' }, { label: '精品课程', key: 'lesson' }, { label: '新闻中心', key: 'news' }, { label: '教师资格', key: 'teacher_qe' }, { label: '司法考试', key: 'judcial_exam' }],
+        ptypeOptions: [{ label: '网站内容', key: 'web-content' }, { label: '精品课程', key: 'lesson' }, { label: '新闻中心', key: 'news' }],
         tableKey: 0,
         selectWhichOne: {},
         uploadLoading: false
@@ -208,7 +207,7 @@
       getList() {
         this.listLoading = true
         this.selectWhichOne = {}
-        fetchList(this.listQuery).then(response => {
+        fetchList(this.listQuery.type, { keyword: this.listQuery.keyword }).then(response => {
           this.dialogList = response.data.list
           this.listLoading = false
         })

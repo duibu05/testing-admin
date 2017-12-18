@@ -1,7 +1,7 @@
 <template>
   <section>
     <el-table :data="list" v-loading="loading" :element-loading-text="loadingText" border fit highlight-current-row style="width: 100%">
-
+      
       <el-table-column align="center" label="海报图片" width="150">
         <template scope="scope">
           <el-popover
@@ -30,12 +30,14 @@
         </template>
       </el-table-column>
     </el-table>
+
+    <!-- <el-button type="text" icon="plus" @click.native="handleEdit(0, listQuery.type)">添加</el-button> -->
   </section>
  
 </template>
 
 <script>
-import { fetchList, update } from '@/api/carousel-mgmt'
+import { fetchList, update } from '@/api/restful'
 
 import Sortable from 'sortablejs'
 
@@ -74,8 +76,8 @@ export default {
     getList() {
       this.loading = true
 
-      fetchList(this.listQuery).then(response => {
-        this.list = response.data[this.listQuery.type]
+      fetchList('carousel-mgmt', this.listQuery).then(response => {
+        this.list = response.data.body
         this.$emit('dataList', this.list)
         this.loading = false
         this.$nextTick(() => {
