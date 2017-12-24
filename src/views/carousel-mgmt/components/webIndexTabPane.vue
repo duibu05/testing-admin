@@ -1,6 +1,6 @@
 <template>
   <section>
-    <el-table :data="list" v-loading="loading" :element-loading-text="loadingText" border fit highlight-current-row style="width: 100%">
+    <el-table :relist="retrivewFlag" :data="list" v-loading="loading" :element-loading-text="loadingText" border fit highlight-current-row style="width: 100%">
       
       <el-table-column align="center" label="海报图片" width="150">
         <template scope="scope">
@@ -11,7 +11,7 @@
             <p>请选择操作......</p>
             <div style="text-align: right; margin: 0">
               <el-button size="mini" type="text" @click.native="emitPreview(scope.row.post)">查看大图</el-button>
-              <el-button type="primary" size="mini" @click.native="emitUpdatePic(scope.row.id)">修改图片</el-button>
+              <el-button type="primary" size="mini" @click.native="emitUpdatePic(scope.row._id)">修改图片</el-button>
             </div>
             <img slot="reference" :src="scope.row.post+'?imageView2/2/w/100'" alt="">
           </el-popover>
@@ -26,7 +26,7 @@
 
       <el-table-column align="center" label="操作" width="100">
         <template scope="scope">
-          <el-button type="text" icon="edit" @click.native="handleEdit(scope.row.id, listQuery.type)">编辑</el-button>
+          <el-button type="text" icon="edit" @click.native="handleEdit(scope.row._id, listQuery.cat, listQuery.page)">编辑</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -43,9 +43,22 @@ import Sortable from 'sortablejs'
 
 export default {
   props: {
-    type: {
-      type: String,
-      default: 'indexCarousels'
+    cat: {
+      type: String
+    },
+    page: {
+      type: String
+    },
+    retrivew: 0
+  },
+  computed: {
+    retrivewFlag() {
+      if (this.retrivew) {
+        this.getList()
+        this.$emit('resetRetrivew')
+        return true
+      }
+      return false
     }
   },
   data() {
@@ -55,7 +68,8 @@ export default {
       loadingText: '拼命加载中...',
       list: null,
       listQuery: {
-        type: this.type
+        cat: this.cat,
+        page: this.page
       },
       loading: false
     }
@@ -70,14 +84,14 @@ export default {
     emitPreview(url) {
       this.$emit('preview', url)
     },
-    handleEdit(id, type) {
-      this.$emit('edit', { id, type })
+    handleEdit(id, cat, page) {
+      this.$emit('edit', { id: id, cat: cat, page: page })
     },
     getList() {
       this.loading = true
 
-      fetchList('carousel-mgmt', this.listQuery).then(response => {
-        this.list = response.data.body
+      fetchList('recommended-mgmt', this.listQuery).then(response => {
+        this.list = response.data[this.listQuery.cat]
         this.$emit('dataList', this.list)
         this.loading = false
         this.$nextTick(() => {
@@ -97,10 +111,11 @@ export default {
             console.log(this.list)
             this.loading = true
             this.loadingText = '正在保存排序，请等我一下...'
-            update({
-              type: this.listQuery.type,
-              data: this.list
-            }).then(response => {
+            update('', {
+              cat: this.listQuery.cat,
+              page: this.listQuery.page,
+              _id: ''
+            }, {}).then(response => {
               this.$message.success(response.data.msg)
               this.loading = false
             })
@@ -111,4 +126,13 @@ export default {
   }
 }
 </script>
+
+<style lang="scss" scoped>
+  .el-table{
+    /deep/.cell{
+      margin-top: 7px;
+    }
+  }
+</style>
+
 

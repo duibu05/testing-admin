@@ -3,7 +3,7 @@
     <el-tabs style='margin-top:15px;' v-model="activeName">
       <el-tab-pane v-for="item in tabMapOptions" :label="item.label" :key='item.key' :name="item.key">
         <keep-alive>
-          <tab-pane v-if='activeName==item.key' :type='item.key' @edit='handleEdit' @preview="handlePreviewImg" @updatePic="handleUpdatePic" @dataList="list = $event"></tab-pane>
+          <tab-pane v-if='activeName==item.key' :retrivew="retrivew" :page="page" :cat='item.key' @edit='handleEdit' @preview="handlePreviewImg" @updatePic="handleUpdatePic" @dataList="handleDataList" @resetRetrivew="resetRetrivew"></tab-pane>
         </keep-alive>
       </el-tab-pane>
     </el-tabs>
@@ -53,8 +53,8 @@
           <el-table-column
             label="标题">
             <template scope="scope">
-              <span>{{scope.row.stdName}}</span>
-              <i class="el-icon-check success" v-show="selectWhichOne.id === scope.row.id"></i>
+              <span>{{scope.row.title}}</span>
+              <i class="el-icon-check success" v-show="selectWhichOne._id === scope.row._id"></i>
             </template>
           </el-table-column>
         </el-table>
@@ -74,7 +74,7 @@
 
   import waves from '@/directive/waves/index.js' // 水波纹指令
 
-  import { fetchList } from '@/api/restful'
+  import { fetchList, update } from '@/api/restful'
 
   export default {
     name: 'tabEdit',
@@ -92,22 +92,26 @@
         previewURL: '',
         bodyLoading: false,
         tabMapOptions: [
-          { label: '首页轮播', key: 'indexCarousels' },
+          { label: '首页轮播', key: 'carousels' },
           { label: '推荐课程', key: 'recommendedLesson' },
           { label: '新闻资讯', key: 'news' }
         ],
-        activeName: 'indexCarousels',
+        activeName: 'carousels',
         showDialog: false,
         dialogList: null,
         list: null,
         listLoading: false,
         listQuery: {
-          type: ''
+          type: 'web-content'
         },
         ptypeOptions: [{ label: '网站内容', key: 'web-content' }, { label: '精品课程', key: 'lesson' }, { label: '新闻中心', key: 'news' }],
         tableKey: 0,
         selectWhichOne: {},
-        uploadLoading: false
+        editWhichOne: {},
+        uploadLoading: false,
+        page: 'webIndex',
+        dataList: [],
+        retrivew: 0
       }
     },
     methods: {
@@ -118,18 +122,9 @@
         this.bodyLoading = true
         this.showUploadDialog = false
   
-        // 模拟接口提交
-        const _this = this
-        setTimeout(() => {
-          _this.list.map(v => {
-            if (v.id === _this.targetId) {
-              v.post = process.env.QINIU_DOWNLOAD_DOMAIN + _this.newImgURL
-              _this.bodyLoading = false
-              _this.targetId = 0
-              _this.newImgURL = ''
-            }
-          })
-        }, 1500)
+        this.updateItem(this.targetId, {
+          post: process.env.QINIU_DOWNLOAD_DOMAIN + this.newImgURL
+        })
       },
       dropzoneS(file) {
         this.newImgURL = JSON.parse(file.xhr.response).hash
@@ -159,6 +154,9 @@
         this.showPreview = true
         this.previewURL = url
       },
+      handleDataList(list) {
+        this.dataList = list
+      },
       closePreview() {
         this.showPreview = false
         this.previewURL = ''
@@ -181,24 +179,31 @@
 
         this.closeDialog()
       },
+      resetRetrivew() {
+        this.retrivew = 0
+      },
       submitDialog() {
         this.bodyLoading = true
-        // console.log(this.selectWhichOne)
+        this.updateItem(this.editWhichOne.id, {
+          title: this.selectWhichOne.title,
+          type: this.listQuery.type,
+          target_id: this.selectWhichOne._id
+        })
         this.closeDialog()
-
-        // 模拟借口调用
-        setTimeout(() => {
+      },
+      updateItem(id, data) {
+        update('recommended-mgmts', id, data).then(res => {
+          this.$message.success('修改成功！')
           this.bodyLoading = false
-          this.$message.success('修改成功啦！')
-        }, 2000)
+          this.retrivew = 1
+        })
       },
       handleEdit(e) {
-        // console.log(e)
         this.showDialog = true
+        this.editWhichOne = e
       },
       handleSelectAction(crow, oldrow) {
         if (crow) {
-          // console.log(crow)
           this.selectWhichOne = crow
         } else {
           this.selectWhichOne = {}
