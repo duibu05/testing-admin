@@ -3,7 +3,7 @@
     <el-tabs style='margin-top:15px;' v-model="activeName">
       <el-tab-pane v-for="item in tabMapOptions" :label="item.label" :key='item.key' :name="item.key">
         <keep-alive>
-          <tab-pane v-if='activeName==item.key' :type='item.key' @edit='handleEdit' @preview="handlePreviewImg" @updatePic="handleUpdatePic" @dataList="list = $event"></tab-pane>
+          <tab-pane v-if='activeName==item.key' :retrivew="retrivew" :page="page" :cat='item.key' @edit='handleEdit' @preview="handlePreviewImg" @updatePic="handleUpdatePic" @dataList="handleDataList" @resetRetrivew="resetRetrivew"></tab-pane>
         </keep-alive>
       </el-tab-pane>
     </el-tabs>
@@ -37,7 +37,7 @@
       
       <div class="app-container calendar-list-container">
         <div class="filter-container">
-          <el-input @keyup.enter.native="getList" style="width: 200px;" class="filter-item" placeholder="学员姓名" v-model="listQuery.keyword">
+          <el-input @keyup.enter.native="getList" style="width: 200px;" class="filter-item" placeholder="请输入关键字" v-model="listQuery.keyword">
           </el-input>
 
           <el-select @change='getList' style="width: 120px" class="filter-item" v-model="listQuery.type" placeholder="类别">
@@ -53,8 +53,8 @@
           <el-table-column
             label="标题">
             <template scope="scope">
-              <span>{{scope.row.stdName}}</span>
-              <i class="el-icon-check success" v-show="selectWhichOne.id === scope.row.id"></i>
+              <span>{{scope.row.name || scope.row.title}}</span>
+              <i class="el-icon-check success" v-show="selectWhichOne._id === scope.row._id"></i>
             </template>
           </el-table-column>
         </el-table>
@@ -64,7 +64,7 @@
         <el-button @click="clearDialog">取 消</el-button>
         <el-button type="primary" :disabled="!selectWhichOne" @click="submitDialog">确 定</el-button>
       </span>
-    </el-dialog>  
+    </el-dialog>
   </div>
 </template>
 
@@ -74,7 +74,7 @@
 
   import waves from '@/directive/waves/index.js' // 水波纹指令
 
-  import { fetchList } from '@/api/joiner'
+  import { fetchList, update } from '@/api/restful'
 
   export default {
     name: 'tabEdit',
@@ -92,23 +92,26 @@
         previewURL: '',
         bodyLoading: false,
         tabMapOptions: [
-          { label: '内容分类', key: 'indexCarousels' },
-          { label: '试卷分类', key: 'recommendedLesson' },
-          { label: '首页推荐', key: 'news' }
+          { label: '内容分类', key: 'contentCat' },
+          { label: '试卷分类', key: 'paperCat' },
+          { label: '首页推荐', key: 'indexRecommended' }
         ],
-        activeName: 'indexCarousels',
+        activeName: 'contentCat',
         showDialog: false,
         dialogList: null,
         list: null,
         listLoading: false,
         listQuery: {
-          title: '',
-          type: ''
+          type: 'category?type=wechat-content&level=first'
         },
-        ptypeOptions: [{ label: '网站内容', key: '' }, { label: '精品课程', key: 'lesson' }, { label: '新闻中心', key: 'news' }, { label: '教师资格', key: 'teacher_qe' }, { label: '司法考试', key: 'judcial_exam' }],
+        ptypeOptions: [{ label: '内容分类', key: 'category?type=wechat-content&level=first', cat: 'contentCat' }, { label: '试卷分类', key: 'category?type=shijuan&level=first', cat: 'paperCat' }, { label: '微信内容', key: 'wechat-content', cat: 'indexRecommended' }],
         tableKey: 0,
         selectWhichOne: {},
-        uploadLoading: false
+        editWhichOne: {},
+        uploadLoading: false,
+        page: 'wechatIndex',
+        dataList: [],
+        retrivew: 0
       }
     },
     methods: {
@@ -119,22 +122,13 @@
         this.bodyLoading = true
         this.showUploadDialog = false
   
-        // 模拟接口提交
-        const _this = this
-        setTimeout(() => {
-          _this.list.map(v => {
-            if (v.id === _this.targetId) {
-              v.post = process.env.QINIU_DOWNLOAD_DOMAIN + _this.newImgURL
-              _this.bodyLoading = false
-              _this.targetId = 0
-              _this.newImgURL = ''
-            }
-          })
-        }, 1500)
+        this.updateItem(this.targetId, {
+          post: process.env.QINIU_DOWNLOAD_DOMAIN + this.newImgURL
+        })
       },
       dropzoneS(file) {
-        this.uploadLoading = false
         this.newImgURL = JSON.parse(file.xhr.response).hash
+        this.uploadLoading = false
         this.$message({ message: '上传成功', type: 'success' })
       },
       dropzoneR(file) {
@@ -160,6 +154,9 @@
         this.showPreview = true
         this.previewURL = url
       },
+      handleDataList(list) {
+        this.dataList = list
+      },
       closePreview() {
         this.showPreview = false
         this.previewURL = ''
@@ -169,11 +166,12 @@
         this.showDialog = false
         this.selectWhichOne = {}
       },
-      clearDialog() {
+      clearDialog(done) {
         if (this.selectWhichOne && this.selectWhichOne.id) {
           this.$confirm('确认关闭？')
             .then(_ => {
               this.closeDialog()
+              done()
             })
             .catch(_ => {})
           return
@@ -181,24 +179,37 @@
 
         this.closeDialog()
       },
+      resetRetrivew() {
+        this.retrivew = 0
+      },
       submitDialog() {
         this.bodyLoading = true
-        // console.log(this.selectWhichOne)
+        let type = ''
+        this.ptypeOptions.filter(v => {
+          if (v.key === this.listQuery.type) {
+            type = v.cat
+          }
+        })
+        this.updateItem(this.editWhichOne.id, {
+          title: this.selectWhichOne.name || this.selectWhichOne.title,
+          type: type,
+          target_id: this.selectWhichOne._id
+        })
         this.closeDialog()
-
-        // 模拟借口调用
-        setTimeout(() => {
+      },
+      updateItem(id, data) {
+        update('recommended-mgmts', id, data).then(res => {
+          this.$message.success('修改成功！')
           this.bodyLoading = false
-          this.$message.success('修改成功啦！')
-        }, 2000)
+          this.retrivew = 1
+        })
       },
       handleEdit(e) {
-        // console.log(e)
         this.showDialog = true
+        this.editWhichOne = e
       },
       handleSelectAction(crow, oldrow) {
         if (crow) {
-          // console.log(crow)
           this.selectWhichOne = crow
         } else {
           this.selectWhichOne = {}
@@ -207,7 +218,7 @@
       getList() {
         this.listLoading = true
         this.selectWhichOne = {}
-        fetchList(this.listQuery).then(response => {
+        fetchList(this.listQuery.type, { keyword: this.listQuery.keyword }).then(response => {
           this.dialogList = response.data.list
           this.listLoading = false
         })
