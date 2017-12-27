@@ -107,8 +107,6 @@ export default {
             const temp = this.list[evt.newIndex]
             this.list[evt.newIndex] = this.list[evt.oldIndex]
             this.list[evt.oldIndex] = temp
-
-            console.log(this.list)
             this.loading = true
             this.loadingText = '正在保存排序，请等我一下...'
             update('', {
@@ -134,5 +132,3 @@ export default {
     }
   }
 </style>
-
-

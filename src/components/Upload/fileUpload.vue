@@ -37,7 +37,6 @@
     },
     methods: {
       handleRemove(file, fileList) {
-        console.log(file, fileList)
         delete this.obj[file.url]
         this.emitInput(this.obj)
       },
@@ -45,7 +44,6 @@
         this.$emit('input', val)
       },
       handleImageScucess(file, fileList) {
-        console.log(file, fileList)
         this.obj[fileList.response.hash] = { name: fileList.name, url: fileList.response.hash }
         this.loading = false
         this.emitInput(this.obj)

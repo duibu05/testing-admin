@@ -662,7 +662,6 @@
             }
             // 监听进度回调
             function uploadProgress (event) {
-                console.log(event)
                 if (event.lengthComputable) {
                     that.progress = 100 * Math.round(event.loaded) / event.total;
                 }
