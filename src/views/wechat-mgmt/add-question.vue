@@ -28,15 +28,21 @@
 
       <el-form-item label="试题选项" prop="answers">
         <section class="keywords" v-for="(answer, index) in form.answers"
-        :key="answer.key">
-        <el-input style="width: 65px;" placeholder="选项" v-model="answer.options"></el-input>
-        <el-input placeholder="选项内容" v-model="answer.content"></el-input>
-        <el-radio class="radio" v-model="form.rightAnswer" :label="answer.options">是否为正确答案</el-radio>
-        <el-button-group>
-          <el-button v-if="index !== 0 || form.answers.length > 2" @click.prevent="removeAnswer(answer)" size="mini" icon="delete" type="primary"></el-button>
-          <el-button @click.prevent="addAnswer(answer)" size="mini" type="primary" icon="plus"></el-button>
-        </el-button-group>
+          :key="answer.key">
+          <el-input style="width: 65px;" placeholder="选项" v-model="answer.options"></el-input>
+          <el-input placeholder="选项内容" v-model="answer.content"></el-input>
+          <!-- <el-radio class="radio" v-model="form.rightAnswer" :label="answer.options">是否为正确答案</el-radio> -->
+          <el-button-group>
+            <el-button v-if="index !== 0 || form.answers.length > 2" @click.prevent="removeAnswer(answer)" size="mini" icon="delete" type="primary"></el-button>
+            <el-button @click.prevent="addAnswer(answer)" size="mini" type="primary" icon="plus"></el-button>
+          </el-button-group>
         </section>
+      </el-form-item>
+
+      <el-form-item label="正确答案" prop="rightAnswer">
+        <el-checkbox-group v-model="form.rightAnswer">
+          <el-checkbox :label="answer.options" v-for="answer in form.answers" :key="answer.key"></el-checkbox>
+        </el-checkbox-group>
       </el-form-item>
 
       <el-form-item label="答案解析" prop="analysis">
@@ -67,10 +73,19 @@
         catOptions: [],
         subCatOptions: [],
         form: {
-          rightAnswer: 'A',
+          rightAnswer: [],
           title: '',
           answers: [{
-            options: '',
+            options: 'A',
+            content: ''
+          }, {
+            options: 'B',
+            content: ''
+          }, {
+            options: 'C',
+            content: ''
+          }, {
+            options: 'D',
             content: ''
           }],
           firstCat: '',
@@ -83,7 +98,7 @@
             { required: true, message: '请输入试题标题！' }
           ],
           rightAnswer: [
-            { required: true, message: '请输入正确答案！' }
+            { required: true, message: '请选择正确答案！' }
           ],
           answers: [
             { required: true, message: '请输入选项！' }
@@ -115,6 +130,11 @@
         var index = this.form.answers.indexOf(item)
         if (index !== -1) {
           this.form.answers.splice(index, 1)
+        }
+
+        var rightAnswerIndex = this.form.rightAnswer.indexOf(item.options)
+        if (rightAnswerIndex !== -1) {
+          this.form.rightAnswer.splice(rightAnswerIndex, 1)
         }
       },
       addAnswer() {
