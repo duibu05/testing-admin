@@ -27,13 +27,13 @@ export default {
       thumbnailHeight: this.thumbnailHeight,
       maxFiles: this.maxFiles,
       maxFilesize: this.maxFilesize,
-      dictRemoveFile: 'Remove',
+      dictRemoveFile: '删除',
       addRemoveLinks: this.showRemoveLink,
       acceptedFiles: this.acceptedFiles,
       autoProcessQueue: this.autoProcessQueue,
       dictDefaultMessage: '<i style="margin-top: 3em;display: inline-block" class="material-icons">' + this.defaultMsg + '</i><br>点击上传或者拖动文件到此处上传',
       dictMaxFilesExceeded: '只能一个图',
-      previewTemplate: '<div style="width: 70%;" ><img data-dz-thumbnail style="width: 100%;" /></div>',
+      previewTemplate: '<div><img data-dz-thumbnail style="width: 100%;" /></div>',
       init() {
         const val = vm.defaultImg
         if (!val) return
@@ -135,6 +135,9 @@ export default {
     this.dropzone.destroy()
   },
   watch: {
+    needClearDZFiles() {
+      this.needClearDZFiles && this.removeAllFiles()
+    },
     defaultImg(val) {
       if (val.length === 0) {
         this.initOnce = false
@@ -146,6 +149,10 @@ export default {
     }
   },
   props: {
+    needClearDZFiles: {
+      type: Boolean,
+      default: false
+    },
     id: {
       type: String,
       required: true

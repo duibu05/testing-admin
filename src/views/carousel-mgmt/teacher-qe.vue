@@ -17,11 +17,12 @@
 
     <el-dialog
       title="修改图片"
+      size="tiny"
       top="5%"
       :visible.sync="showUploadDialog"
       :before-close="cancelUploading">
       <div class="editor-container">
-        <dropzone v-on:dropzone-removedFile="dropzoneR" :maxFiles="1" v-on:dropzone-success="dropzoneS" v-loading="uploadLoading" element-loading-text="正在上传..." @uploadBegin="showUploadLoading" id="myVueDropzone" :url="QINIU_UPLOAD_DOMAIN"></dropzone>
+        <dropzone v-on:dropzone-removedFile="dropzoneR" :needClearDZFiles="clearDZFiles" :showRemoveLink="true" :maxFiles="1" v-on:dropzone-success="dropzoneS" v-loading="uploadLoading" element-loading-text="正在上传..." @uploadBegin="showUploadLoading" id="myVueDropzone" :url="QINIU_UPLOAD_DOMAIN"></dropzone>
       </div>
       <span slot="footer" class="dialog-footer">
         <el-button @click="cancelUploading">取 消</el-button>
@@ -84,6 +85,7 @@
     },
     data() {
       return {
+        clearDZFiles: false,
         QINIU_UPLOAD_DOMAIN: process.env.QINIU_UPLOAD_DOMAIN,
         newImgURL: '',
         targetId: 0,
@@ -116,6 +118,7 @@
     methods: {
       showUploadLoading() {
         this.uploadLoading = true
+        this.clearDZFiles = false
       },
       updatingImg() {
         this.bodyLoading = true
@@ -137,6 +140,7 @@
         this.showUploadDialog = false
         this.targetId = 0
         this.newImgURL = ''
+        this.clearDZFiles = true
       },
       cancelUploading() {
         this.$confirm('确认关闭？')
@@ -195,6 +199,7 @@
           this.$message.success('修改成功！')
           this.bodyLoading = false
           this.retrivew = 1
+          this.clearDZFiles = true
         })
       },
       handleEdit(e) {

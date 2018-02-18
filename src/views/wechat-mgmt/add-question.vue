@@ -31,7 +31,6 @@
           :key="answer.key">
           <el-input style="width: 65px;" placeholder="选项" v-model="answer.options"></el-input>
           <el-input placeholder="选项内容" v-model="answer.content"></el-input>
-          <!-- <el-radio class="radio" v-model="form.rightAnswer" :label="answer.options">是否为正确答案</el-radio> -->
           <el-button-group>
             <el-button v-if="index !== 0 || form.answers.length > 2" @click.prevent="removeAnswer(answer)" size="mini" icon="delete" type="primary"></el-button>
             <el-button @click.prevent="addAnswer(answer)" size="mini" type="primary" icon="plus"></el-button>
