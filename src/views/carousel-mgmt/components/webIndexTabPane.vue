@@ -1,7 +1,9 @@
 <template>
   <section>
+    <div>
+      <el-button v-if="cat === 'famousTeacher'" type="text" icon="plus" @click.native="handleAdd">新增</el-button>
+    </div>
     <el-table :relist="retrivewFlag" :data="list" v-loading="loading" :element-loading-text="loadingText" border fit highlight-current-row style="width: 100%">
-      
       <el-table-column align="center" label="海报图片" width="150">
         <template scope="scope">
           <el-popover
@@ -24,20 +26,19 @@
         </template>
       </el-table-column>
 
-      <el-table-column align="center" label="操作" width="100">
+      <el-table-column align="center" label="操作" width="200">
         <template scope="scope">
           <el-button type="text" icon="edit" @click.native="handleEdit(scope.row._id, listQuery.cat, listQuery.page)">编辑</el-button>
+          <el-button v-if="cat === 'famousTeacher'" type="text" icon="delete" @click.native="handleDelete(scope.row._id)">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
-
-    <!-- <el-button type="text" icon="plus" @click.native="handleEdit(0, listQuery.type)">添加</el-button> -->
   </section>
  
 </template>
 
 <script>
-import { fetchList, update } from '@/api/restful'
+import { fetchList, update, del } from '@/api/restful'
 
 import Sortable from 'sortablejs'
 
@@ -86,6 +87,15 @@ export default {
     },
     handleEdit(id, cat, page) {
       this.$emit('edit', { id: id, cat: cat, page: page })
+    },
+    handleAdd() {
+      this.$emit('add', {})
+    },
+    handleDelete(id) {
+      this.list = this.list.filter(v => v._id !== id)
+      del('recommended-mgmt', id).then(response => {
+        this.$message.success('删除成功！')
+      })
     },
     getList() {
       this.loading = true

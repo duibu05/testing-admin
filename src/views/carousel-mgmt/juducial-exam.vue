@@ -3,7 +3,7 @@
     <el-tabs style='margin-top:15px;' v-model="activeName">
       <el-tab-pane v-for="item in tabMapOptions" :label="item.label" :key='item.key' :name="item.key">
         <keep-alive>
-          <tab-pane v-if='activeName==item.key' :retrivew="retrivew" :page="page" :cat='item.key' @edit='handleEdit' @preview="handlePreviewImg" @updatePic="handleUpdatePic" @dataList="handleDataList" @resetRetrivew="resetRetrivew"></tab-pane>
+          <tab-pane v-if='activeName==item.key' :retrivew="retrivew" :page="page" :cat='item.key' @edit='handleEdit' @add="handleAdd" @preview="handlePreviewImg" @updatePic="handleUpdatePic" @dataList="handleDataList" @resetRetrivew="resetRetrivew"></tab-pane>
         </keep-alive>
       </el-tab-pane>
     </el-tabs>
@@ -22,7 +22,7 @@
       :visible.sync="showUploadDialog"
       :before-close="cancelUploading">
       <div class="editor-container">
-        <dropzone v-on:dropzone-removedFile="dropzoneR" :needClearDZFiles="clearDZFiles" :showRemoveLink="true" :maxFiles="1" v-on:dropzone-success="dropzoneS" v-loading="uploadLoading" element-loading-text="正在上传..." @uploadBegin="showUploadLoading" id="myVueDropzone" :url="QINIU_UPLOAD_DOMAIN"></dropzone>
+        <dropzone :needClearDZFiles="clearDZFiles" :showRemoveLink="true" :maxFiles="1" v-on:dropzone-success="dropzoneS" v-loading="uploadLoading" element-loading-text="正在上传..." @uploadBegin="showUploadLoading" id="myVueDropzone" :url="QINIU_UPLOAD_DOMAIN"></dropzone>
       </div>
       <span slot="footer" class="dialog-footer">
         <el-button @click="cancelUploading">取 消</el-button>
@@ -31,7 +31,7 @@
     </el-dialog>
 
     <el-dialog
-      title="编 辑" 
+      :title="editWhichOne.id ? '编 辑' : '新 增'" 
       size="tiny"
       :visible.sync="showDialog" 
       :before-close="clearDialog">
@@ -75,7 +75,7 @@
 
   import waves from '@/directive/waves/index.js' // 水波纹指令
 
-  import { fetchList, update } from '@/api/restful'
+  import { fetchList, update, save } from '@/api/restful'
 
   export default {
     name: 'tabEdit',
@@ -132,9 +132,6 @@
         this.newImgURL = JSON.parse(file.xhr.response).hash
         this.uploadLoading = false
         this.$message({ message: '上传成功', type: 'success' })
-      },
-      dropzoneR(file) {
-        this.$message({ message: '删除成功', type: 'success' })
       },
       closeUploadDialog() {
         this.showUploadDialog = false
@@ -195,12 +192,26 @@
         this.closeDialog()
       },
       updateItem(id, data) {
-        update('recommended-mgmts', id, data).then(res => {
-          this.$message.success('修改成功！')
+        let req
+        if (id) {
+          req = update('recommended-mgmts', id, data)
+        } else {
+          data.post = 'http://cdn.gdpassing.com/FoTy_372n_9CQp2_r3r_jY3Kt3uJ'
+          data.page = this.page
+          data.cat = 'famousTeacher'
+          req = save('recommended-mgmts', data)
+        }
+        req.then(res => {
+          const str = id ? '修改' : '新增'
+          this.$message.success(str + '成功！')
           this.bodyLoading = false
           this.retrivew = 1
           this.clearDZFiles = true
         })
+      },
+      handleAdd() {
+        this.showDialog = true
+        this.editWhichOne = {}
       },
       handleEdit(e) {
         this.showDialog = true

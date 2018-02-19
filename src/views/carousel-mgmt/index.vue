@@ -22,7 +22,7 @@
       :visible.sync="showUploadDialog"
       :before-close="cancelUploading">
       <div class="editor-container">
-        <dropzone @dropzone-removedFile="dropzoneR" :needClearDZFiles="clearDZFiles" :showRemoveLink="true" :maxFiles="1" @dropzone-success="dropzoneS" v-loading="uploadLoading" element-loading-text="正在上传..." @uploadBegin="showUploadLoading" id="myVueDropzone" :url="QINIU_UPLOAD_DOMAIN"></dropzone>
+        <dropzone :needClearDZFiles="clearDZFiles" :showRemoveLink="true" :maxFiles="1" @dropzone-success="dropzoneS" v-loading="uploadLoading" element-loading-text="正在上传..." @uploadBegin="showUploadLoading" id="myVueDropzone" :url="QINIU_UPLOAD_DOMAIN"></dropzone>
       </div>
       <span slot="footer" class="dialog-footer">
         <el-button @click="cancelUploading">取 消</el-button>
@@ -133,9 +133,6 @@
         this.newImgURL = JSON.parse(file.xhr.response).hash
         this.uploadLoading = false
         this.$message({ message: '上传成功', type: 'success' })
-      },
-      dropzoneR(file) {
-        this.$message({ message: '删除成功', type: 'success' })
       },
       closeUploadDialog() {
         this.showUploadDialog = false
