@@ -66,7 +66,7 @@ export default {
   },
   data() {
     return {
-      sortOptions: [{ label: '最新发布', key: '-createdAt' }, { label: '最早发布', key: '+createdAt' }],
+      sortOptions: [{ label: '最新发布', key: '-timestamp' }, { label: '最早发布', key: '+timestamp' }],
       list: null,
       total: null,
       listLoading: true,

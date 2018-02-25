@@ -79,7 +79,7 @@ export default {
   },
   data() {
     return {
-      sortOptions: [{ label: '按创建时间升序', key: '+createdAt' }, { label: '按创建时间降序', key: '-createdAt' }],
+      sortOptions: [{ label: '按创建时间升序', key: '+timestamp' }, { label: '按创建时间降序', key: '-timestamp' }],
       list: null,
       total: null,
       listLoading: true,
