@@ -21,6 +21,7 @@
 
       <el-button class="filter-item" type="primary" v-waves icon="search" @click="handleFilter">搜索</el-button>
       <el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="plus" @click="goToAddQuestion('add')">新增试题</el-button>
+      <a href="https://cdn.gdpassing.com/excel/template/question/question-upload-template.xlsx" class="filter-item" style="margin-left: 10px;"><el-button type="primary" v-waves icon="download">模版下载</el-button></a>
       <router-link class="filter-item" style="margin-left: 10px;" :to="{ path: 'question-mgmt/upload' }"><el-button type="primary" icon="upload">表格导入</el-button></router-link>
     </div>
 

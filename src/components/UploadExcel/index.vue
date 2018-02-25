@@ -1,6 +1,10 @@
 <template>
   <div>
-    <el-button :loading="loading" type="primary" @click="handleUpload">select excel file</el-button>
+    <el-button :loading="loading" type="primary" @click="handleUpload">请选择Excel文件</el-button>
+    <el-alert style="margin-top: 25px;"
+      title="选择后将自动开始上传，请提前按照模板组织数据！"
+      type="warning" close-text="知道了" show-icon>
+    </el-alert>
     <input id="excel-upload-input" type="file" accept=".xlsx, .xls" class="c-hide" @change="handkeFileChange">
   </div>
 </template>
