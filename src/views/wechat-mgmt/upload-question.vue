@@ -66,12 +66,26 @@ export default {
       const questions = this.buildQuestions(data)
       const pArr = []
       const rArr = []
+      const cArr = []
       for (let i = 0, len = questions.length; i < len; i++) {
-        pArr.push(save('question/upload', questions[i]))
+        pArr.push(save('question/upload', questions[i]).catch(e => {
+          cArr.push({
+            index: i,
+            error: e
+          })
+        }))
         rArr.push(`p${i}`)
       }
 
       Promise.all(pArr).then((rArr) => {
+        if (cArr.length) {
+          return this.$notify({
+            title: '错误',
+            message: '上传过程中发生错误，部分试题上传失败，请检查: 第' + cArr.map(v => v.index + 1).join(',') + '行， 以上行数上传失败，请修改后手动添加，其他上传成功！',
+            type: 'error',
+            duration: 0
+          })
+        }
         this.$notify({
           title: '成功',
           message: '上传成功！',

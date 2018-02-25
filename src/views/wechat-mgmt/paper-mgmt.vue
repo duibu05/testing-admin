@@ -25,7 +25,7 @@
       </el-select>
 
       <el-button class="filter-item" type="primary" v-waves icon="search" @click="handleFilter">搜索</el-button>
-      <el-button class="filter-item" type="primary" icon="message">下载模板</el-button>
+      <a href="https://cdn.gdpassing.com/excel/template/paper/paper-upload-template.xlsx" class="filter-item" style="margin-left: 10px;"><el-button type="primary" v-waves icon="download">模版下载</el-button></a>
       <router-link class="filter-item" style="margin-left: 10px;" :to="{ path: 'paper-mgmt/upload' }"><el-button type="primary" icon="upload">表格导入</el-button></router-link>
       <el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="plus" @click="goToAddPaper('add')">新增试卷</el-button>
     </div>
@@ -58,7 +58,7 @@
       </el-table-column>
       <el-table-column
         label="试卷分数">
-        <template scope="scope">{{ scope.row.questions.reduce((pre, cur) => pre.points + cur.points) }}</template>
+        <template scope="scope">{{ calculatePoints(scope.row) }}</template>
       </el-table-column>
       <el-table-column
         label="创建时间">
@@ -141,6 +141,13 @@ export default {
     this.getList()
   },
   methods: {
+    calculatePoints(paper) {
+      if (paper.questions && paper.questions.length === 0) return 0
+      if (paper.questions && paper.questions.length === 1) {
+        return paper.questions[0].points
+      }
+      return paper.questions.reduce((pre, cur) => +pre.points + +cur.points)
+    },
     deletePaper(id) {
       this.$confirm('此操作将永久删除该试卷, 是否继续?', '提示', {
         confirmButtonText: '确定',

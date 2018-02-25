@@ -252,7 +252,8 @@
             firstCat: res.data.firstCat,
             secondCat: res.data.secondCat,
             thirdCat: res.data.thirdCat,
-            questions: res.data.questions
+            questions: res.data.questions,
+            image: res.data.image
           }
           this.tempQuestions = [].concat(this.form.questions)
         })
