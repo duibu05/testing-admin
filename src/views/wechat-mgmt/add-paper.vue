@@ -30,6 +30,9 @@
           </el-option>
         </el-select>
       </el-form-item>
+      <el-form-item label="试卷图标" prop="image">
+        <Upload v-model="form.image" class="post"></Upload>
+      </el-form-item>
       <el-form-item label="试题管理">
         <div>
           <div class="filter-container">
@@ -82,7 +85,7 @@
       
       <div class="app-container calendar-list-container">
         <div class="filter-container">
-          <el-input @keyup.enter.native="getList" style="width: 200px;" class="filter-item" placeholder="学员姓名" v-model="dialogListQuery.keyword">
+          <el-input @keyup.enter.native="getList" style="width: 200px;" class="filter-item" placeholder="试卷标题" v-model="dialogListQuery.keyword">
           </el-input>
 
           <el-select @change='getList' style="width: 120px" class="filter-item" v-model="dialogListQuery['firstCat.id']" placeholder="类别">
@@ -131,10 +134,14 @@
 
 <script>
   import { fetchList, update, save, get } from '@/api/restful'
+  import Upload from '@/components/Upload/singleImage4'
   import waves from '@/directive/waves/index.js' // 水波纹指令
   export default {
     directives: {
       waves
+    },
+    components: {
+      Upload
     },
     data() {
       return {
@@ -163,11 +170,15 @@
           firstCat: '',
           secondCat: '',
           thirdCat: '',
+          image: '',
           questions: []
         },
         rules: {
           title: [
             { required: true, message: '请输入试卷标题！' }
+          ],
+          image: [
+            { required: true, message: '请上传试卷图标！' }
           ]
         }
       }
@@ -333,6 +344,10 @@
   .container{
     margin: 30px;
     max-width: 1024px;
+    .post{
+      width: 200px;
+      height: 200px;
+    }
     .keywords{
       margin: 0 10px 10px 0;
 
