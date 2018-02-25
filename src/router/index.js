@@ -186,6 +186,13 @@ export const asyncRouterMap = [
         meta: { role: ['admin'], isEdit: true }
       },
       {
+        path: 'paper-mgmt/upload',
+        component: _import('wechat-mgmt/upload-paper'),
+        name: '试卷管理 / 导入试卷',
+        hidden: true,
+        meta: { role: ['admin'] }
+      },
+      {
         path: 'question-mgmt',
         component: _import('wechat-mgmt/question-mgmt'),
         name: '试题管理',
@@ -197,6 +204,13 @@ export const asyncRouterMap = [
         name: '试题管理 / 添加试题',
         hidden: true,
         meta: { role: ['admin'], isEdit: false }
+      },
+      {
+        path: 'question-mgmt/upload',
+        component: _import('wechat-mgmt/upload-question'),
+        name: '试题管理 / 导入试题',
+        hidden: true,
+        meta: { role: ['admin'] }
       },
       {
         path: 'question-mgmt/edit/:id',
