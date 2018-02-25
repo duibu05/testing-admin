@@ -29,7 +29,7 @@
       <el-table-column
         label="新闻分类">
         <template scope="scope">
-          <span>新闻中心</span>
+          <span :class="scope.row.timestamp">新闻中心</span>
         </template>
       </el-table-column>
       <el-table-column

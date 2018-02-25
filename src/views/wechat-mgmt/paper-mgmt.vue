@@ -58,7 +58,7 @@
       </el-table-column>
       <el-table-column
         label="试卷分数">
-        <template scope="scope">100</template>
+        <template scope="scope">{{ scope.row.questions.reduce((pre, cur) => pre.points + cur.points) }}</template>
       </el-table-column>
       <el-table-column
         label="创建时间">
