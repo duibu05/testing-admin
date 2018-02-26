@@ -23,7 +23,7 @@
         label="头像">
         <template scope="scope">
           <a href="javascript:;">
-            <img style="margin-top: 7px;" @click="previewAvator(scope.row.avator)" :src="scope.row.avator + '?imageView2/1/w/45/h/45'" alt="">
+            <img style="margin-top: 7px;" @click="previewAvator(scope.row.avator)" :src="scope.row.avator.replace(/0$/,'46')" alt="">
           </a>
         </template>
       </el-table-column>
