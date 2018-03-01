@@ -32,7 +32,7 @@
 
     <el-dialog
       :title="editWhichOne.id ? '编 辑' : '新 增'" 
-      size="tiny"
+      size="small"
       :visible.sync="showDialog" 
       :before-close="clearDialog">
       

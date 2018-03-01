@@ -25,7 +25,7 @@
       <el-dialog
         title="添加分类"
         :visible.sync="dialogVisible"
-        size="tiny"
+        size="small"
         :before-close="handleClose">
         <el-form ref="form" :model="form" :rules="rules">
           <el-form-item prop="name" label="分类名称" label-width="120px">

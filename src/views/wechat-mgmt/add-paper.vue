@@ -201,6 +201,9 @@
         }).catch(() => {})
       },
       selectQuestion(obj) {
+        if (this.form.questions.filter(v => v.id === obj._id).length) {
+          return this.$message.error('请勿重复添加！')
+        }
         this.$prompt('请输入分数！', '提示', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
@@ -212,7 +215,7 @@
             title: obj.title,
             firstCat: obj.firstCat.name,
             secondCat: obj.secondCat.name,
-            points: value
+            points: +value
           })
           this.handleFilter()
           this.$message({
@@ -227,21 +230,10 @@
         })
       },
       getList() {
+        this.listLoading = true
         fetchList('question', this.dialogListQuery).then(res => {
           this.dialogList = res.data.list
-        })
-      },
-      removeAnswer(item) {
-        var index = this.form.answers.indexOf(item)
-        if (index !== -1) {
-          this.form.answers.splice(index, 1)
-        }
-      },
-      addAnswer() {
-        this.form.answers.push({
-          options: '',
-          content: '',
-          key: Date.now()
+          this.listLoading = false
         })
       },
       fetchData() {

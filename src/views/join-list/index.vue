@@ -49,8 +49,10 @@
         label="报名渠道">
       </el-table-column>
       <el-table-column
-        prop="joinAt"
         label="报名时间">
+        <template scope="scope">
+          <span>{{new Date(scope.row.joinAt).getTime() / 1000 | formatTime('{y}-{m}-{d} {h}:{i}')}}</span>
+        </template>
       </el-table-column>
     </el-table>
 

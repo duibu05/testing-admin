@@ -42,7 +42,7 @@
       <el-table-column
         prop="title"
         label="试卷名称"
-        width="400">
+        width="300">
       </el-table-column>
       <el-table-column
         prop="firstCat.name"
@@ -61,9 +61,10 @@
         <template scope="scope">{{ calculatePoints(scope.row) }}</template>
       </el-table-column>
       <el-table-column
+        width="160"
         label="创建时间">
         <template scope="scope">
-          <span>{{new Date(scope.row.createdAt).getTime() | parseTime}}</span>
+          <span>{{new Date(scope.row.createdAt).getTime() / 1000 | formatTime('{y}-{m}-{d} {h}:{i}')}}</span>
         </template>
       </el-table-column>
       <el-table-column align="center" label="操作" width="200">
@@ -146,7 +147,7 @@ export default {
       if (paper.questions && paper.questions.length === 1) {
         return paper.questions[0].points
       }
-      return paper.questions.reduce((pre, cur) => +pre.points + +cur.points)
+      return paper.questions.reduce((pre, cur) => ({ points: pre.points + +cur.points }), { points: 0 }).points
     },
     deletePaper(id) {
       this.$confirm('此操作将永久删除该试卷, 是否继续?', '提示', {

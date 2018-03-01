@@ -46,7 +46,7 @@
       </el-table-column>
       <el-table-column
         label="开课时间">
-        <template scope="scope">{{new Date(scope.row.startTime).getTime() | parseTime}}</template>
+        <template scope="scope">{{new Date(scope.row.startTime).getTime() / 1000 | formatTime('{y}-{m}-{d} {h}:{i}')}}</template>
       </el-table-column>
       <el-table-column align="center" label="操作" width="300">
         <template scope="scope">

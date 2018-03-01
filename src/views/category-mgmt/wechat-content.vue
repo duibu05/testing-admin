@@ -5,7 +5,7 @@
       <el-tab-pane v-for="(value, key) in category" :key="key" :label="value.label" :name="key">
         <el-row>
           <el-col :span="4" v-for="(cat, index) in value.list" :key="index">
-            <el-card style="margin-right: 10px;" :body-style="{ padding: '0px' }">
+            <el-card style="margin-right: 10px;" :body-style="{ padding: '10px' }">
               <img :src="cat.image + '?imageView2/1/w/200/h/200'" class="image" style="width: 100%;">
               <div class="category-name">
                 <span>{{cat.name}}</span>
@@ -25,7 +25,7 @@
       <el-dialog
         title="添加分类"
         :visible.sync="dialogVisible"
-        size="tiny"
+        size="small"
         :before-close="handleClose">
         <el-form ref="form" :model="form" :rules="rules">
           <el-form-item prop="name" label="分类名称" label-width="120px">

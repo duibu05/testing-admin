@@ -23,7 +23,7 @@
         label="头像">
         <template scope="scope">
           <a href="javascript:;">
-            <img style="margin-top: 7px;" @click="previewAvator(scope.row.avator)" :src="scope.row.avator.replace(/0$/,'46')" alt="">
+            <img style="margin-top: 7px; max-width: 46px;" @click="previewAvator(scope.row.avator)" :src="scope.row.avator.replace(/0$/,'46')" alt="">
           </a>
         </template>
       </el-table-column>
@@ -38,7 +38,7 @@
       <el-table-column
         label="注册时间">
         <template scope="scope">
-          <span>{{new Date(scope.row.createdAt).getTime() | parseTime}}</span>
+          <span>{{new Date(scope.row.createdAt).getTime() / 1000 | formatTime('{y}-{m}-{d} {h}:{i}')}}</span>
         </template>
       </el-table-column>
     </el-table>

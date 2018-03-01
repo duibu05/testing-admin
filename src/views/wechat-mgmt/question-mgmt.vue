@@ -50,7 +50,7 @@
       <el-table-column
         label="创建时间">
         <template scope="scope">
-          <span>{{new Date(scope.row.createdAt).getTime() | parseTime}}</span>
+          <span>{{new Date(scope.row.createdAt).getTime() / 1000 | formatTime('{y}-{m}-{d} {h}:{i}')}}</span>
         </template>
       </el-table-column>
       <el-table-column align="center" label="操作" width="200">

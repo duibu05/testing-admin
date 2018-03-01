@@ -32,7 +32,7 @@
 
     <el-dialog
       title="编 辑" 
-      size="tiny"
+      size="small"
       :visible.sync="showDialog" 
       :before-close="clearDialog">
       
