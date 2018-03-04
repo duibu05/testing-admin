@@ -159,7 +159,11 @@
       },
       submitForm(formName) {
         this.$refs[formName].validate((valid) => {
+          const answersContentNotFinished = this.form.answers.filter(v => !v.content).map(v => v.options)
           if (valid) {
+            if (answersContentNotFinished && answersContentNotFinished.length) {
+              return this.$message.error(`选项${answersContentNotFinished.join(',')}内容不能为空！`)
+            }
             this.showLoading = true
             let opt
 
