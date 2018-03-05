@@ -41,7 +41,7 @@
       <el-form-item label="报名费用" prop="cost">
         <el-input placeholder="请输入报名费用" v-model="form.cost"></el-input>
       </el-form-item>
-      <el-form-item label="课程简介" class="item-fluid">
+      <el-form-item label="课程简介" class="item-fluid" prop="brief">
         <el-input
           type="textarea"
           style="min-width: 740px"
@@ -68,8 +68,8 @@
         </el-transfer>
       </el-form-item>
       <el-form-item style="margin-left: 100px;">
-        <el-button type="primary" @click="submitForm('form')">保存并上架</el-button>
-        <el-button type="default" @click="submitForm('form')">仅保存</el-button>
+        <el-button type="primary" @click="submitForm('form', 1)">保存并上架</el-button>
+        <el-button type="default" @click="submitForm('form', 0)">仅保存</el-button>
         <el-button @click="resetForm('form')">重置</el-button>
       </el-form-item>
     </el-form>
@@ -134,6 +134,9 @@
           releatedLesson: []
         },
         rules: {
+          brief: [
+            { required: true, message: '请输入课程简介' }
+          ],
           cat: [
             { required: true, message: '请选择课程分类' }
           ],
@@ -196,7 +199,8 @@
           this.showLoading = false
         })
       },
-      submitForm(formName) {
+      submitForm(formName, status) {
+        this.form.status = status
         this.$refs[formName].validate((valid) => {
           if (valid) {
             this.showLoading = true
