@@ -3,7 +3,7 @@
     <el-button class="filter-item" style="margin-bottom: 20px;" type="primary" icon="plus" @click="dialogVisible = true">添加</el-button>
     <el-tabs v-if="category" type="border-card" class="tab" v-model="activeName" @tab-click="handleClick">
       <el-tab-pane v-for="(value, key) in category" :key="key" :label="value.label" :name="key">
-        <el-row>
+        <el-row v-if="key === 'first'">
           <el-col :span="4" v-for="(cat, index) in value.list" :key="index">
             <el-card style="margin-right: 10px;" :body-style="{ padding: '10px' }">
               <img :src="cat.image + '?imageView2/1/w/200/h/200'" class="image" style="width: 100%;">
@@ -18,8 +18,54 @@
             </el-card>
           </el-col>
           <el-col v-if="!value.list || (value.list && value.list.length === 0)"><span style="color: #99A9BF;">暂无数据！</span></el-col>
-
         </el-row>
+        <el-table v-if="key !== 'first'" :data="value.list" border fit stripe highlight-current-row style="width: 100%" max-height="600">
+          <el-table-column
+            width="65"
+            align="center"
+            label="编号">
+            <template scope="scope">
+              <span>{{scope.$index+1}}</span>
+            </template>
+          </el-table-column>
+          <el-table-column
+            prop="name"
+            label="名称">
+          </el-table-column>
+          <el-table-column
+            label="所属一级分类">
+            <template scope="scope">
+              <span v-if="scope.row.first">{{scope.row.first.name}}</span>
+              <span v-else>-</span>
+            </template>
+          </el-table-column>
+          <el-table-column
+            label="所属二级分类">
+            <template scope="scope">
+              <span v-if="scope.row.second">{{scope.row.second.name}}</span>
+              <span v-else>-</span>
+            </template>
+          </el-table-column>
+          <el-table-column
+            label="所属三级分类">
+            <template scope="scope">
+              <span v-if="scope.row.third">{{scope.row.third.name}}</span>
+              <span v-else>-</span>
+            </template>
+          </el-table-column>
+          <el-table-column
+            label="所属四级分类">
+            <template scope="scope">
+              <span v-if="scope.row.fourth">{{scope.row.fourth.name}}</span>
+              <span v-else>-</span>
+            </template>
+          </el-table-column>
+          <el-table-column align="center" label="操作" width="200">
+            <template scope="scope">
+              <el-button type="text" icon="delete" @click="confirmDel(scope.row.level, scope.$index, scope.row._id)">删除</el-button>
+            </template>
+          </el-table-column>
+        </el-table>
       </el-tab-pane>
 
       <el-dialog
@@ -32,9 +78,15 @@
             <el-input v-model="form.name" placeholder="请输入分类名称"></el-input>
           </el-form-item>
 
-          <el-form-item prop="cat" label="所属分类" label-width="120px">
-            <el-select v-model="form.cat" placeholder="请选择分类">
+          <el-form-item prop="cat" label="分类" label-width="120px">
+            <el-select v-model="form.cat" placeholder="请选择分类" @change="changeCat">
               <el-option v-for="(value, key) in category" :label="value.label" :value="key" :key="key"></el-option>
+            </el-select>
+          </el-form-item>
+
+          <el-form-item v-for="(item, index) in catMapping" :prop="item.key" v-if="index < activeIndex" :key="index" :label="item.name" label-width="120px">
+            <el-select v-model="form[item.key]" placeholder="请选择分类">
+              <el-option v-for="(cat, idx) in catLevels[index]" :label="cat.name" :value="cat" :key="idx"></el-option>
             </el-select>
           </el-form-item>
 
@@ -58,19 +110,42 @@
     components: { Upload },
     data() {
       return {
+        catLevels: [],
         dialogVisible: false,
         showLoading: false,
         activeName: 'first',
+        activeIndex: 0,
+        catMapping: [{
+          name: '所属一级分类',
+          key: 'first'
+        }, {
+          name: '所属二级分类',
+          key: 'second'
+        }, {
+          name: '所属三级分类',
+          key: 'third'
+        }, {
+          name: '所属四级分类',
+          key: 'fourth'
+        }],
         category: null,
         form: {
           name: '',
           image: '',
-          cat: ''
+          cat: 'first',
+          first: undefined,
+          second: undefined,
+          third: undefined,
+          fourth: undefined
         },
         rules: {
           name: [{ required: true, message: '名称不能为空！' }],
           image: [{ required: true, message: '图片不能为空！' }],
-          cat: [{ required: true, message: '所属分类不能为空！' }]
+          cat: [{ required: true, message: '分类不能为空！' }],
+          first: [{ required: true, message: '所属一级分类不能为空！' }],
+          second: [{ required: true, message: '所属二级分类不能为空！' }],
+          third: [{ required: true, message: '所属三级分类不能为空！' }],
+          fourth: [{ required: true, message: '所属四级分类不能为空！' }]
         },
         disabled: true
       }
@@ -86,6 +161,14 @@
       }
     },
     methods: {
+      changeCat() {
+        for (let i = 0; i < 4; i++) {
+          if (this.catMapping[i].key === this.form.cat) {
+            this.activeIndex = i
+            break
+          }
+        }
+      },
       resetForm() {
         this.$refs['form'].resetFields()
       },
@@ -95,7 +178,7 @@
             this.activeName = this.form.cat
             this.dialogVisible = false
             this.showLoading = true
-            save('category', { type: 'shijuan', name: this.form.name, image: this.form.image, level: this.form.cat }).then(response => {
+            save('category', { type: 'shijuan', name: this.form.name, image: this.form.image, first: this.form.first, second: this.form.second, third: this.form.third, fourth: this.form.fourth, level: this.form.cat }).then(response => {
               this.showLoading = false
               this.category[this.form.cat].list.push(response.data)
               this.resetForm()
@@ -124,7 +207,9 @@
           .catch(_ => {})
       },
       handleClick(tab, event) {
-        // console.log(tab, event)
+        this.activeIndex = +tab.index
+        this.activeName = tab.name
+        this.form.cat = tab.name
       }
     },
     created() {
@@ -132,6 +217,12 @@
       fetchList('category/rebuild', { type: 'shijuan' }).then(response => {
         this.showLoading = false
         this.category = response.data || {}
+      })
+
+      fetchList('category/rebuild', { type: 'shijuan' }).then((rebuild) => {
+        this.showLoading = false
+        this.category = rebuild.data || {}
+        this.catLevels = [this.category.first.list, this.category.second.list, this.category.third.list, this.category.fourth.list]
       })
     }
   }
