@@ -29,34 +29,35 @@
             </template>
           </el-table-column>
           <el-table-column
+          align="center"
+          width="100"
+          label="图片">
+            <template scope="scope">
+              <img :src="scope.row.image + '?imageView2/1/w/45/h/45'" alt="">
+            </template>
+          </el-table-column>
+          <el-table-column
             prop="name"
             label="名称">
           </el-table-column>
           <el-table-column
             label="所属一级分类">
             <template scope="scope">
-              <span v-if="scope.row.first">{{scope.row.first.name}}</span>
+              <span v-if="scope.row.first && scope.row.first.name">{{scope.row.first.name}}</span>
               <span v-else>-</span>
             </template>
           </el-table-column>
           <el-table-column
             label="所属二级分类">
             <template scope="scope">
-              <span v-if="scope.row.second">{{scope.row.second.name}}</span>
+              <span v-if="scope.row.second && scope.row.second.name">{{scope.row.second.name}}</span>
               <span v-else>-</span>
             </template>
           </el-table-column>
           <el-table-column
             label="所属三级分类">
             <template scope="scope">
-              <span v-if="scope.row.third">{{scope.row.third.name}}</span>
-              <span v-else>-</span>
-            </template>
-          </el-table-column>
-          <el-table-column
-            label="所属四级分类">
-            <template scope="scope">
-              <span v-if="scope.row.fourth">{{scope.row.fourth.name}}</span>
+              <span v-if="scope.row.third && scope.row.third.name">{{scope.row.third.name}}</span>
               <span v-else>-</span>
             </template>
           </el-table-column>
@@ -84,9 +85,21 @@
             </el-select>
           </el-form-item>
 
-          <el-form-item v-for="(item, index) in catMapping" :prop="item.key" v-if="index < activeIndex" :key="index" :label="item.name" label-width="120px">
-            <el-select v-model="form[item.key]" placeholder="请选择分类">
-              <el-option v-for="(cat, idx) in catLevels[index]" :label="cat.name" :value="cat" :key="idx"></el-option>
+          <el-form-item prop="first" v-if="0 < activeIndex" label="所属一级分类" label-width="120px">
+            <el-select v-model="form.first" value-key="_id" placeholder="请选择分类" @change="form.second = undefined, form.third = undefined">
+              <el-option v-for="(cat, idx) in catLevels[0]" :label="cat.name" :value="cat" :key="idx"></el-option>
+            </el-select>
+          </el-form-item>
+
+          <el-form-item prop="second" v-if="1 < activeIndex && form.first && form.first._id" label="所属二级分类" label-width="120px">
+            <el-select v-model="form.second" value-key="_id" placeholder="请选择分类" @change="form.third = undefined">
+              <el-option v-for="(cat, idx) in catLevels[1].filter(v => v.first._id === form.first._id)" :label="cat.name" :value="cat" :key="idx"></el-option>
+            </el-select>
+          </el-form-item>
+
+          <el-form-item prop="third" v-if="2 < activeIndex && form.second && form.second._id" label="所属三级分类" label-width="120px">
+            <el-select v-model="form.third" value-key="_id" placeholder="请选择分类">
+              <el-option v-for="(cat, idx) in catLevels[2].filter(v => v.second._id === form.second._id)" :label="cat.name" :value="cat" :key="idx"></el-option>
             </el-select>
           </el-form-item>
 
@@ -135,8 +148,7 @@
           cat: 'first',
           first: undefined,
           second: undefined,
-          third: undefined,
-          fourth: undefined
+          third: undefined
         },
         rules: {
           name: [{ required: true, message: '名称不能为空！' }],
@@ -163,9 +175,9 @@
     methods: {
       changeCat() {
         for (let i = 0; i < 4; i++) {
+          this.form[this.catMapping[i].key] = undefined
           if (this.catMapping[i].key === this.form.cat) {
             this.activeIndex = i
-            break
           }
         }
       },
