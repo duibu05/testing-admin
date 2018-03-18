@@ -35,6 +35,10 @@ export default {
         thirdCat: {
           id: '',
           name: data.results[0]['三级分类']
+        },
+        fourthCat: {
+          id: '',
+          name: data.results[0]['四级分类']
         }
       }
       const questionKeyMap = {
@@ -99,9 +103,10 @@ export default {
       Promise.all(pArr).then((rArr) => {
         Promise.all([
           fetchList('category', { type: 'shijuan', level: 'first', name: paper.firstCat.name }),
-          fetchList('category', { type: 'shijuan', level: 'first', name: paper.firstCat.name }),
-          fetchList('category', { type: 'shijuan', level: 'first', name: paper.firstCat.name })
-        ]).then(([p1, p2, p3]) => {
+          fetchList('category', { type: 'shijuan', level: 'second', name: paper.secondCat.name }),
+          fetchList('category', { type: 'shijuan', level: 'third', name: paper.thirdCat.name }),
+          fetchList('category', { type: 'shijuan', level: 'fourth', name: paper.fourthCat.name })
+        ]).then(([p1, p2, p3, p4]) => {
           const pObj = {
             title: data.results[0]['试卷标题'],
             firstCat: {
@@ -115,6 +120,10 @@ export default {
             thirdCat: {
               id: p3.data.list[0]._id,
               name: data.results[0]['三级分类']
+            },
+            fourthCat: {
+              id: p4.data.list[0]._id,
+              name: data.results[0]['四级分类']
             },
             image: 'https://cdn.gdpassing.com/FgsvWqXmgOu8RLvUd4usTL0M7iec',
             questions: []

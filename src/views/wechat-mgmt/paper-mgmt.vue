@@ -10,12 +10,17 @@
       </el-select>
 
       <el-select clearable @change='handleFilter' style="width: 120px" class="filter-item" v-model="listQuery['secondCat.id']" placeholder="试卷子类">
-        <el-option v-for="item in subCatOptions" :key="item.key" :label="item.label" :value="item.key">
+        <el-option v-for="item in subCatOptions.filter(v => v.first._id === listQuery['firstCat.id'])" :key="item.key" :label="item.label" :value="item.key">
         </el-option>
       </el-select>
 
       <el-select clearable @change='handleFilter' style="width: 120px" class="filter-item" v-model="listQuery['thirdCat.id']" placeholder="三级分类">
-        <el-option v-for="item in grandSubCatOptions" :key="item.key" :label="item.label" :value="item.key">
+        <el-option v-for="item in grandSubCatOptions.filter(v => v.second._id === listQuery['secondCat.id'])" :key="item.key" :label="item.label" :value="item.key">
+        </el-option>
+      </el-select>
+
+      <el-select clearable @change='handleFilter' style="width: 120px" class="filter-item" v-model="listQuery['fourthCat.id']" placeholder="四级分类">
+        <el-option v-for="item in grandGrandSubCatOptions.filter(v => v.third._id === listQuery['thirdCat.id'])" :key="item.key" :label="item.label" :value="item.key">
         </el-option>
       </el-select>
 
@@ -25,7 +30,7 @@
       </el-select>
 
       <el-button class="filter-item" type="primary" v-waves icon="search" @click="handleFilter">搜索</el-button>
-      <a href="https://cdn.gdpassing.com/excel/template/paper/paper-upload-template.xlsx" class="filter-item" style="margin-left: 10px;"><el-button type="primary" v-waves icon="download">模版下载</el-button></a>
+      <a href="https://cdn.gdpassing.com/excel/template/paper/paper-upload-excel-template.xlsx" class="filter-item" style="margin-left: 10px;"><el-button type="primary" v-waves icon="download">模版下载</el-button></a>
       <router-link class="filter-item" style="margin-left: 10px;" :to="{ path: 'paper-mgmt/upload' }"><el-button type="primary" icon="upload">表格导入</el-button></router-link>
       <el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="plus" @click="goToAddPaper('add')">新增试卷</el-button>
     </div>
@@ -57,6 +62,10 @@
         label="三级分类">
       </el-table-column>
       <el-table-column
+        prop="fourthCat.name"
+        label="四级分类">
+      </el-table-column>
+      <el-table-column
         label="试卷分数">
         <template scope="scope">{{ calculatePoints(scope.row) }}</template>
       </el-table-column>
@@ -84,6 +93,7 @@
 </template>
 
 <script>
+import _ from 'lodash'
 import { fetchList, del } from '@/api/restful'
 import waves from '@/directive/waves/index.js' // 水波纹指令
 import { parseTime } from '@/utils'
@@ -108,11 +118,13 @@ export default {
         type: undefined,
         'firstCat.id': undefined,
         'secondCat.id': undefined,
-        'thirdCat.id': undefined
+        'thirdCat.id': undefined,
+        'fourthCat.id': undefined
       },
       catOptions: [],
       subCatOptions: [],
       grandSubCatOptions: [],
+      grandGrandSubCatOptions: [],
       tableKey: 0
     }
   },
@@ -121,19 +133,25 @@ export default {
     fetchList('category/rebuild', { type: 'shijuan' }).then(response => {
       this.showLoading = false
       this.catOptions = response.data.first.list.map(v => {
-        const obj = {}
+        const obj = _.assign({}, v)
         obj.label = v.name
         obj.key = v._id
         return obj
       }) || []
       this.subCatOptions = response.data.second.list.map(v => {
-        const obj = {}
+        const obj = _.assign({}, v)
         obj.label = v.name
         obj.key = v._id
         return obj
       }) || []
       this.grandSubCatOptions = response.data.third.list.map(v => {
-        const obj = {}
+        const obj = _.assign({}, v)
+        obj.label = v.name
+        obj.key = v._id
+        return obj
+      }) || []
+      this.grandGrandSubCatOptions = response.data.fourth.list.map(v => {
+        const obj = _.assign({}, v)
         obj.label = v.name
         obj.key = v._id
         return obj

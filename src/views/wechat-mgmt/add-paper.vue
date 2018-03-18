@@ -4,8 +4,8 @@
       <el-form-item label="试卷标题" prop="title">
         <el-input placeholder="请输入试卷标题" v-model="form.title"></el-input>
       </el-form-item>
-      <el-form-item label="试卷分类">
-        <el-select v-model="form.firstCat" value-key="id" clearable placeholder="请选择">
+      <el-form-item label="试卷分类" prop="category">
+        <el-select v-model="form.firstCat" value-key="id" clearable placeholder="请选择" @visible-change="form.secondCat = '', form.thirdCat = '', form.fourthCat = ''">
           <el-option
             v-for="item in catOptions"
             :key="item.id"
@@ -13,17 +13,25 @@
             :value="item">
           </el-option>
         </el-select>
-        <el-select v-model="form.secondCat" value-key="id" clearable placeholder="请选择">
+        <el-select v-model="form.secondCat" v-if="form.firstCat" value-key="id" clearable placeholder="请选择" @visible-change="form.thirdCat = '', form.fourthCat = ''">
           <el-option
-            v-for="item in subCatOptions"
+            v-for="item in subCatOptions.filter(v => form.firstCat.id === v.first._id)"
             :key="item.id"
             :label="item.name"
             :value="item">
           </el-option>
         </el-select>
-        <el-select v-model="form.thirdCat" value-key="id" clearable placeholder="请选择">
+        <el-select v-model="form.thirdCat" v-if="form.secondCat" value-key="id" clearable placeholder="请选择" @visible-change="form.fourthCat = ''">
           <el-option
-            v-for="item in thirdCatOptions"
+            v-for="item in thirdCatOptions.filter(v => form.secondCat.id === v.second._id)"
+            :key="item.id"
+            :label="item.name"
+            :value="item">
+          </el-option>
+        </el-select>
+        <el-select v-model="form.fourthCat" v-if="form.thirdCat" value-key="id" clearable placeholder="请选择">
+          <el-option
+            v-for="item in fourthCatOptions.filter(v => form.thirdCat.id === v.third._id)"
             :key="item.id"
             :label="item.name"
             :value="item">
@@ -133,6 +141,7 @@
 </template>
 
 <script>
+  import _ from 'lodash'
   import { fetchList, update, save, get } from '@/api/restful'
   import Upload from '@/components/Upload/singleImage4'
   import waves from '@/directive/waves/index.js' // 水波纹指令
@@ -144,6 +153,14 @@
       Upload
     },
     data() {
+      var checkCategory = (rule, value, callback) => {
+        if (this.form.firstCat === '' || this.form.secondCat === '' || this.form.thirdCat === '' || this.form.fourthCat === '') {
+          callback(new Error('请选择完整分类'))
+        } else {
+          callback()
+        }
+      }
+
       return {
         listQuery: {
           keyword: undefined,
@@ -164,16 +181,21 @@
         catOptions: [],
         subCatOptions: [],
         thirdCatOptions: [],
+        fourthCatOptions: [],
         tempQuestions: [],
         form: {
           title: '',
           firstCat: '',
           secondCat: '',
           thirdCat: '',
+          fourthCat: '',
           image: '',
           questions: []
         },
         rules: {
+          category: [
+            { validator: checkCategory }
+          ],
           title: [
             { required: true, message: '请输入试卷标题！' }
           ],
@@ -244,6 +266,7 @@
             firstCat: res.data.firstCat,
             secondCat: res.data.secondCat,
             thirdCat: res.data.thirdCat,
+            fourthCat: res.data.fourthCat,
             questions: res.data.questions,
             image: res.data.image
           }
@@ -283,18 +306,16 @@
     created() {
       fetchList('category', { type: 'shijuan', level: 'first' }).then(res => {
         this.catOptions = res.data.list.map(v => {
-          const obj = {}
+          const obj = _.assign({}, v)
           obj.id = v._id
-          obj.name = v.name
 
           return obj
         })
       })
       fetchList('category', { type: 'shijuan', level: 'second' }).then(res => {
         this.subCatOptions = res.data.list.map(v => {
-          const obj = {}
+          const obj = _.assign({}, v)
           obj.id = v._id
-          obj.name = v.name
 
           return obj
         })
@@ -319,9 +340,16 @@
       })
       fetchList('category', { type: 'shijuan', level: 'third' }).then(res => {
         this.thirdCatOptions = res.data.list.map(v => {
-          const obj = {}
+          const obj = _.assign({}, v)
           obj.id = v._id
-          obj.name = v.name
+
+          return obj
+        })
+      })
+      fetchList('category', { type: 'shijuan', level: 'fourth' }).then(res => {
+        this.fourthCatOptions = res.data.list.map(v => {
+          const obj = _.assign({}, v)
+          obj.id = v._id
 
           return obj
         })
